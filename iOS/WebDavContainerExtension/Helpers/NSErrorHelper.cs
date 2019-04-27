@@ -1,4 +1,7 @@
-﻿using FileProvider;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using FileProvider;
 using Foundation;
 
 namespace WebDavContainerExtension.Helpers
@@ -54,6 +57,19 @@ namespace WebDavContainerExtension.Helpers
         public static NSError GetFileProviderDuplicateException()
         {
             return GetFileProviderError(NSFileProviderError.FilenameCollision);
+        }
+
+        public static NSError GetNSError(string errorDomain, long errorCode)
+        {
+            return new NSError(new NSString(errorDomain), new nint(errorCode));
+        }
+
+        public static NSError GetNsError(string errorDomain, long errorCode, Dictionary<string, string> uploadErrorInfo)
+        {
+            using (NSDictionary userInfo = NSDictionary.FromObjectsAndKeys(uploadErrorInfo.Values.ToArray<object>(), uploadErrorInfo.Keys.ToArray<object>()))
+            {
+                return new NSError(new NSString(errorDomain), new nint(errorCode), userInfo);
+            }
         }
     }
 }

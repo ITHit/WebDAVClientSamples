@@ -1,6 +1,10 @@
-﻿using WebDavContainerExtension.Metadatas;
+﻿using System;
+using WebDavContainerExtension.Metadatas;
 using FileProvider;
 using Foundation;
+using ITHit.WebDAV.Client.Exceptions;
+using WebDavContainerExtension.Helpers;
+using WebDavContainerExtension.Storages;
 
 namespace WebDavContainerExtension.FileProviderItems
 {
@@ -10,16 +14,38 @@ namespace WebDavContainerExtension.FileProviderItems
         [Export("documentSize")]
         public NSNumber Size { get; protected set; }
 
-        public FileItem(FileMetadata itemMetadata) : base(itemMetadata)
-        {
+        [Export("isUploaded")]
+        public bool IsUploaded { get; protected set; }
 
-                this.Size = new NSNumber(itemMetadata.ExistsLocal ? itemMetadata.LocalFile.Size : (ulong)itemMetadata.ServerFile.ContentLength);
-                TypeIdentifier = Extension.GetFileTypeIdentifier(itemMetadata.Name);
-                this.Capabilities = NSFileProviderItemCapabilities.Writing
-                                   | NSFileProviderItemCapabilities.Deleting
-                                   | NSFileProviderItemCapabilities.Reading
-                                   | NSFileProviderItemCapabilities.Renaming
-                                   | NSFileProviderItemCapabilities.Reparenting;
+        [Export("isDownloaded")]
+        public bool IsDownloaded { get; protected set; }
+
+        [Export("isMostRecentVersionDownloaded")]
+        public bool IsMostRecentVersionDownloaded { get; protected set; }
+
+        [Export("uploadingError")]
+        public NSError UploadingError { get; protected set; }
+
+        public FileItem(FileMetadata fileMetadata) : base(fileMetadata)
+        {
+            Size = new NSNumber(fileMetadata.Size);
+            TypeIdentifier = Extension.GetFileTypeIdentifier(fileMetadata.Name);
+            this.Capabilities = NSFileProviderItemCapabilities.Writing
+                                | NSFileProviderItemCapabilities.Deleting
+                                | NSFileProviderItemCapabilities.Reading
+                                | NSFileProviderItemCapabilities.Renaming
+                                | NSFileProviderItemCapabilities.Reparenting;
+
+            if(fileMetadata.HasUploadError)
+            {
+                this.Capabilities &= ~(NSFileProviderItemCapabilities.Renaming 
+                                       | NSFileProviderItemCapabilities.Reparenting);
+            }
+
+            IsDownloaded = fileMetadata.ExistsLocal;
+            IsMostRecentVersionDownloaded = fileMetadata.IsSyncByEtag && IsDownloaded;
+            IsUploaded = !fileMetadata.HasUploadError || fileMetadata.IsSyncByEtag;
+            UploadingError = fileMetadata.LocalFile.UploadError;
         }
     }
 }

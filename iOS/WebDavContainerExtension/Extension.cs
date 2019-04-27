@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Net;
 using System.Runtime.InteropServices;
+using FileProvider;
 using Foundation;
 using MobileCoreServices;
 using ObjCRuntime;
@@ -36,7 +37,7 @@ namespace WebDavContainerExtension
         {
             string[] sourceElements = source.Split('/');
             List<string> resultElements = new List<string>();
-            foreach (string element in sourceElements)
+            foreach(string element in sourceElements)
             {
                 resultElements.Add(WebUtility.UrlDecode(element));
             }
@@ -50,7 +51,7 @@ namespace WebDavContainerExtension
         {
             string[] sourceElements = source.Split('/');
             List<string> resultElements = new List<string>();
-            foreach (string element in sourceElements)
+            foreach(string element in sourceElements)
             {
                 resultElements.Add(WebUtility.UrlEncode(element));
             }
@@ -64,20 +65,20 @@ namespace WebDavContainerExtension
         {
             string baseType = "public";
 
-            switch (type)
+            switch(type)
             {
                 case "Folder":
-                    {
-                        baseType += ".folder";
-                        break;
-                    }
+                {
+                    baseType += ".folder";
+                    break;
+                }
                     ;
                 default:
-                    {
-                        string fileExtension = Path.GetExtension(itemName);
-                        baseType = GetUTType(fileExtension);
-                        break;
-                    }
+                {
+                    string fileExtension = Path.GetExtension(itemName);
+                    baseType = GetUTType(fileExtension);
+                    break;
+                }
             }
 
             return baseType;
@@ -91,8 +92,10 @@ namespace WebDavContainerExtension
 
         public static string GetFileTypeIdentifier(string itemName)
         {
-            string fileExtension = Path.GetExtension(itemName);
-            return GetUTType(fileExtension);
+
+                        string fileExtension = Path.GetExtension(itemName);
+                       return GetUTType(fileExtension);
+
         }
     }
 }

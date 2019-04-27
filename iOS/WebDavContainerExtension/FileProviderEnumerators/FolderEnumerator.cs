@@ -11,12 +11,8 @@ namespace WebDavContainerExtension.FileProviderEnumerators
     public class FolderEnumerator : NSObject, INSFileProviderEnumerator
     {
         private readonly StorageManager storageManager;
-
         private readonly string enumeratedItemIdentifier;
-
         private readonly ChangeTracker changeTracker;
-
-        public uint SyncAnchor { get; protected set; }
 
         public FolderEnumerator(string enumeratedItemIdentifier, StorageManager storageManager)
         {
@@ -121,5 +117,7 @@ namespace WebDavContainerExtension.FileProviderEnumerators
         {
             return NSData.FromString(anchorNumber.ToString(), NSStringEncoding.UTF8);
         }
+
+        public uint SyncAnchor { get; protected set; }
     }
 }

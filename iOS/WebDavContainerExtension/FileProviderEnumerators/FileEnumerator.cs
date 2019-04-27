@@ -12,10 +12,7 @@ namespace WebDavContainerExtension.FileProviderEnumerators
     public class FileEnumerator : NSObject, INSFileProviderEnumerator
     {
         private readonly StorageManager storageManager;
-
         private readonly string EnumeratedItemIdentifier;
-
-        public uint SyncAnchor { get; protected set; }
 
         public FileEnumerator(string enumeratedItemIdentifier, StorageManager storageManager)
         {
@@ -37,7 +34,7 @@ namespace WebDavContainerExtension.FileProviderEnumerators
         {
             try
             {
-                FileMetadata metadata = storageManager.GetFileMetadata(this.EnumeratedItemIdentifier);
+                var metadata = storageManager.GetFileMetadata(this.EnumeratedItemIdentifier);
                 if(!metadata.IsExists)
                 {
                     observer.FinishEnumerating(NsErrorHelper.GetFileProviderNotFoundError(EnumeratedItemIdentifier));
@@ -94,8 +91,9 @@ namespace WebDavContainerExtension.FileProviderEnumerators
 
         private static uint GetUintFromNsData(NSData syncAnchor)
         {
-            string anchorString = NSString.FromData(syncAnchor, NSStringEncoding.UTF8).ToString();
-            return uint.Parse(anchorString);
+            var anchorString = NSString.FromData(syncAnchor, NSStringEncoding.UTF8).ToString();
+            var anchor = uint.Parse(anchorString);
+            return anchor;
         }
 
         [Export("currentSyncAnchorWithCompletionHandler:")]
@@ -108,5 +106,7 @@ namespace WebDavContainerExtension.FileProviderEnumerators
         {
             return NSData.FromString(anchorNumber.ToString(), NSStringEncoding.UTF8);
         }
+
+        public uint SyncAnchor { get; protected set; }
     }
 }

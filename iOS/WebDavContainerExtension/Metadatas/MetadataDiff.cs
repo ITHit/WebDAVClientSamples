@@ -1,4 +1,8 @@
-﻿namespace WebDavContainerExtension.Metadatas
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+
+namespace WebDavContainerExtension.Metadatas
 {
     public class MetadataDiff
     {
@@ -13,7 +17,7 @@
 
         public MetadataDiff()
         {
-            DeletedId = new string[0];
+            DeletedId =new string[0];
             Updated = new ItemMetadata[0];
         }
     }

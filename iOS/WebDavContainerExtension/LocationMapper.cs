@@ -7,7 +7,6 @@ namespace WebDavContainerExtension
 {
     public class LocationMapper
     {
-        private const string PathPrivatePrefix = "/private";
         public string LocalStorageRoot { get; }
         public Uri ServerRoot { get; }
 
@@ -20,9 +19,9 @@ namespace WebDavContainerExtension
         public string GetIdentifierFromLocalPath(string localPath)
         {
             if(localPath == null) throw new ArgumentNullException(nameof(localPath));
-            if(LocalStorageRoot.StartsWith(PathPrivatePrefix) && !localPath.StartsWith(PathPrivatePrefix))
+            if(LocalStorageRoot.StartsWith("/private") && !localPath.StartsWith("/private"))
             {
-                localPath = PathPrivatePrefix + localPath;
+                localPath = "/private" + localPath;
             }
 
             var relativeUrl = localPath.Replace(LocalStorageRoot, string.Empty).TrimStart(Path.DirectorySeparatorChar);

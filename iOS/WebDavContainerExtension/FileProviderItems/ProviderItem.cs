@@ -18,6 +18,9 @@ namespace WebDavContainerExtension.FileProviderItems
         [Export("isShared")]
         public bool IsShared => true;
 
+        [Export("lastUsedDate")]
+        public NSDate LastUsedDate { get; set; }
+
     protected ProviderItem(ItemMetadata createdFolder)
         {
             this.Identifier = createdFolder.Identifier;

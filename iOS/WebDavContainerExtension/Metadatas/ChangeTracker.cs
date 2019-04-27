@@ -7,7 +7,6 @@ namespace WebDavContainerExtension.Metadatas
     public class ChangeTracker
     {
         private readonly IDictionary<uint, string[]> changeSets;
-
         private uint currentAnchor;
 
         public ChangeTracker()

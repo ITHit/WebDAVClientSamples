@@ -1,4 +1,8 @@
-﻿using System.Linq;
+﻿using System;
+using System.IO;
+using System.Linq;
+using System.Runtime.Serialization;
+using System.Xml;
 using WebDavContainerExtension.Extensions;
 using Foundation;
 using WebDavContainerExtension.Helpers;
@@ -7,66 +11,90 @@ namespace WebDavContainerExtension.Storages
 {
     public class LocalStorage
     {
+        private readonly DataContractSerializer _fileExtendedAttributeSerializer;
+        private const string ExtendedAttributeKey = "FsExtensionMetadata";
 
         public LocalStorage()
         {
+            _fileExtendedAttributeSerializer = new DataContractSerializer(typeof(FileExtendedAttribute));
         }
 
-        private const string ExtendedAttributeKey = "FsExtensionMetadata";
-
-        public LocalFile GetFile(string localPath)
+        private LocalFile GetFile(string localPath, bool isExists)
         {
-            if (!NSFileManager.DefaultManager.FileExists(localPath)) {
-                return new LocalFile(localPath, false);
-               }
-
-            string extendedAttributes = NSFileManagerHelper.GetExtendedAttribute(localPath, ExtendedAttributeKey);
-
-                return new LocalFile(localPath, true)
-                {
-                    Size = NSFileManager.DefaultManager.GetAttributes(localPath).Size.GetValueOrDefault(),
-                    Etag = extendedAttributes
-                };
-
-        }
-
-        public LocalFolder GetFolder(string localPath)
-        {
-            if (!NSFileManager.DefaultManager.FileExists(localPath))
+            if(localPath == null)
             {
-                return new LocalFolder(localPath, false);
+                throw new ArgumentNullException(nameof(localPath));
             }
 
-            return new LocalFolder(localPath, true);
+            if(!isExists)
+        {
+                return LocalFile.CreateNotExist(localPath);
+               }
+
+            ulong fileSize = NSFileManager.DefaultManager.GetAttributes(localPath).Size.GetValueOrDefault();
+            try
+            {
+                FileExtendedAttribute fileExtendedAttribute = this.GetFileExtendedAttribute(localPath);
+                return LocalFile.CreateExists(localPath, fileSize, fileExtendedAttribute);
+
+                    }
+            catch(SerializationException)
+            {
+                NSFileManagerHelper.DeleteExtendedAttribute(localPath, ExtendedAttributeKey);
+                return LocalFile.CreateExists(localPath, fileSize);
+            }
+        }
+
+        protected FileExtendedAttribute  GetFileExtendedAttribute(string localPath)
+        {
+            if (localPath == null)
+            {
+                throw new ArgumentNullException(nameof(localPath));
+            }
+
+            string extendedAttributes = NSFileManagerHelper.GetExtendedAttribute(localPath, ExtendedAttributeKey);
+            if (string.IsNullOrEmpty(extendedAttributes))
+            {
+                return null;
+        }
+
+            using (TextReader stringReader = new StringReader(extendedAttributes))
+            using (XmlReader xmlReader = new XmlTextReader(stringReader))
+            {
+                return (FileExtendedAttribute)_fileExtendedAttributeSerializer.ReadObject(xmlReader);
+            }
         }
 
         public LocalItem GetItem(string localPath)
         {
             bool isDirectory = false;
-            NSFileManager.DefaultManager.FileExists(localPath, ref isDirectory);
+            bool isExists = NSFileManager.DefaultManager.FileExists(localPath, ref isDirectory);
             if (isDirectory)
             {
-                return GetFolder(localPath);
+                return new LocalFolder(localPath, isExists);
             }
 
-            return GetFile(localPath);
+            return GetFile(localPath, isExists);
         }
 
         public LocalItem[] GetFolderContent(LocalFolder folder)
         {
             if(!folder.IsExists) return new LocalItem[0];
-            NSError error = null;
-            NSUrl[] files = NSFileManager.DefaultManager.GetDirectoryContent(NSUrl.FromFilename(folder.Path), null, NSDirectoryEnumerationOptions.SkipsHiddenFiles, out error);
+            NSError error;
+            NSUrl[] files = NSFileManager.DefaultManager.GetDirectoryContent(NSUrl.FromFilename(folder.Path),
+                                                                             null,
+                                                                             NSDirectoryEnumerationOptions.SkipsHiddenFiles,
+                                                                             out error);
+
             if(error != null)
             {
                 throw error.AsException();
             }
 
-
             return files.Select(f => GetItem(f.Path)).ToArray();
         }
 
-        public void CoordinatedDelete(LocalItem item)
+        public void Delete(LocalItem item)
         {
             using (NSUrl url = NSUrl.FromFilename(item.Path))
             {
@@ -75,16 +103,41 @@ namespace WebDavContainerExtension.Storages
                 if(removeError != null)
                 {
                     throw removeError.AsException();
-                }
+            }
+        }
+        }
+
+        public LocalFile UpdateFile(LocalFile localFile)
+        {
+            if (NSFileManager.DefaultManager.FileExists(localFile.Path))
+            {
+                WriteFileExtendedAttribute(localFile, localFile.ExtendedAttribute);
+            }
+
+            return GetFile(localFile.Path);
+        }
+
+        private void WriteFileExtendedAttribute(LocalFile itemLocalItem, FileExtendedAttribute fileExtendedAttribute)
+        {
+            using (TextWriter writer = new StringWriter())
+            using (var xmlWriter = new XmlTextWriter(writer))
+            {
+                _fileExtendedAttributeSerializer.WriteObject(xmlWriter, fileExtendedAttribute);
+                xmlWriter.Flush();
+                NSFileManagerHelper.SetExtendedAttribute(itemLocalItem.Path, ExtendedAttributeKey, writer.ToString());
             }
         }
 
-        public LocalFile UpdateFile(LocalFile itemLocalItem)
+        public LocalFile GetFile(string localPath)
         {
-            string etag = itemLocalItem.Etag ?? string.Empty;
-            NSFileManagerHelper.SetExtendedAttribute(itemLocalItem.Path, ExtendedAttributeKey, etag);
-            return GetFile(itemLocalItem.Path);
-        }
+            bool isExists = NSFileManager.DefaultManager.FileExists(localPath);
+            return GetFile(localPath, isExists);
+    }
 
+        public LocalFolder GetFolder(string localPath)
+        {
+            bool isExists = NSFileManager.DefaultManager.FileExists(localPath);
+            return new LocalFolder(localPath, isExists);
+        }
     }
 }

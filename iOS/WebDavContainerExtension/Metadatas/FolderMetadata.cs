@@ -7,7 +7,6 @@ namespace WebDavContainerExtension.Metadatas
         : ItemMetadata
     {
         public IFolderAsync ServerFolder { get; set; }
-
         public LocalFolder LocalFolder { get; set; }
 
         public FolderMetadata(string identifier, string parentIdentifier, string name, LocalFolder localItem, IFolderAsync serverItem = null) 

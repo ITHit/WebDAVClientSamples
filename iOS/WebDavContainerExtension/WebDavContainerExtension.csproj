@@ -18,7 +18,8 @@
     <DefineConstants>__IOS__;__MOBILE__;__UNIFIED__;DEBUG;ASYNC;CF2_SP1;</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
-    <CodesignKey></CodesignKey>
+    <CodesignKey>
+    </CodesignKey>
     <MtouchDebug>true</MtouchDebug>
     <MtouchNoSymbolStrip>true</MtouchNoSymbolStrip>
     <MtouchFastDev>true</MtouchFastDev>
@@ -28,8 +29,10 @@
     <MtouchHttpClientHandler>NSUrlSessionHandler</MtouchHttpClientHandler>
     <DeviceSpecificBuild>false</DeviceSpecificBuild>
     <CodesignEntitlements>Entitlements.plist</CodesignEntitlements>
-    <CodesignProvision></CodesignProvision>
+    <CodesignProvision>
+    </CodesignProvision>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <MtouchFloat32>true</MtouchFloat32>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|iPhone' ">
     <DebugType>
@@ -40,18 +43,22 @@
     </DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
-    <CodesignKey></CodesignKey>
+    <CodesignKey>
+    </CodesignKey>
     <MtouchFloat32>true</MtouchFloat32>
     <CodesignEntitlements>Entitlements.plist</CodesignEntitlements>
     <MtouchLink>SdkOnly</MtouchLink>
     <MtouchArch>ARM64</MtouchArch>
     <MtouchHttpClientHandler>NSUrlSessionHandler</MtouchHttpClientHandler>
-    <CodesignProvision></CodesignProvision>
+    <CodesignProvision>
+    </CodesignProvision>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <MtouchNoSymbolStrip>true</MtouchNoSymbolStrip>
+    <MtouchNoSymbolStrip>false</MtouchNoSymbolStrip>
     <AssemblyName>WebDavContainerExtension</AssemblyName>
     <DeviceSpecificBuild>false</DeviceSpecificBuild>
     <MtouchFastDev>false</MtouchFastDev>
+    <MtouchUseLlvm>true</MtouchUseLlvm>
+    <OptimizePNGs>true</OptimizePNGs>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|iPhoneSimulator' ">
     <DebugType>
@@ -62,12 +69,14 @@
     </DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
-    <CodesignKey></CodesignKey>
+    <CodesignKey>
+    </CodesignKey>
     <MtouchNoSymbolStrip>true</MtouchNoSymbolStrip>
-    <MtouchLink>SdkOnly</MtouchLink>
+    <MtouchLink>None</MtouchLink>
     <MtouchArch>x86_64</MtouchArch>
     <MtouchHttpClientHandler>NSUrlSessionHandler</MtouchHttpClientHandler>
-    <CodesignProvision></CodesignProvision>
+    <CodesignProvision>
+    </CodesignProvision>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <MtouchFloat32>true</MtouchFloat32>
     <CodesignEntitlements>Entitlements.plist</CodesignEntitlements>
@@ -80,7 +89,8 @@
     <DefineConstants>__IOS__;__MOBILE__;__UNIFIED__;DEBUG;</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
-    <CodesignKey></CodesignKey>
+    <CodesignKey>
+    </CodesignKey>
     <DeviceSpecificBuild>true</DeviceSpecificBuild>
     <MtouchDebug>true</MtouchDebug>
     <MtouchNoSymbolStrip>true</MtouchNoSymbolStrip>
@@ -88,10 +98,11 @@
     <MtouchFloat32>true</MtouchFloat32>
     <CodesignEntitlements>Entitlements.plist</CodesignEntitlements>
     <IOSDebuggerPort>23212</IOSDebuggerPort>
-    <MtouchLink>None</MtouchLink>
+    <MtouchLink>SdkOnly</MtouchLink>
     <MtouchArch>ARM64</MtouchArch>
     <MtouchHttpClientHandler>NSUrlSessionHandler</MtouchHttpClientHandler>
-    <CodesignProvision></CodesignProvision>
+    <CodesignProvision>
+    </CodesignProvision>
     <AssemblyName>WebDavContainerExtension</AssemblyName>
     <MtouchUseLlvm>
     </MtouchUseLlvm>
@@ -119,19 +130,23 @@
     <MtouchFastDev>true</MtouchFastDev>
     <MtouchLink>Full</MtouchLink>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <CodesignProvision></CodesignProvision>
+    <CodesignProvision>
+    </CodesignProvision>
     <AssemblyName>WebDavContainerExtension</AssemblyName>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(RunConfiguration)' == 'Default' ">
     <AppExtensionDebugBundleId />
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="ITHit.WebDAV.Client, Version=2.0.420.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\ITHitWebDAVClient.2.0.421\lib\Xamarin.iOS10\ITHit.WebDAV.Client.dll</HintPath>
+    <Reference Include="ITHit.WebDAV.Client, Version=3.0.1032.0, Culture=neutral, PublicKeyToken=2ed2d3f88a9114ce, processorArchitecture=MSIL">
+      <HintPath>..\packages\ITHitWebDAVClient.3.0.1032-beta\lib\Xamarin.iOS10\ITHit.WebDAV.Client.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
+    <Reference Include="System.Runtime.Serialization" />
+    <Reference Include="System.Xml" />
     <Reference Include="Xamarin.iOS" />
+    <Reference Include="System.Net.Http" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Resources\" />
@@ -160,6 +175,7 @@
     <Compile Include="Metadatas\StorageManager.cs" />
     <Compile Include="Extensions\NSErrorExtension.cs" />
     <Compile Include="Helpers\NSErrorHelper.cs" />
+    <Compile Include="Storages\FileExtendedAttribute.cs" />
     <Compile Include="Storages\LocalFile.cs" />
     <Compile Include="Storages\LocalFolder.cs" />
     <Compile Include="Storages\LocalItem.cs" />

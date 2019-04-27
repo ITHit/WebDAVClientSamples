@@ -15,7 +15,6 @@ namespace WebDavContainerExtension.Metadatas
         private readonly WebDavSessionAsync Session;
         public LocationMapper LocationMapper { get; }
         public LocalStorage LocalStorage { get; }
-        private const int Bufsize = 262144;
 
         public StorageManager(LocationMapper locationMapper, WebDavSessionAsync session, LocalStorage localStorage)
         {
@@ -117,7 +116,7 @@ namespace WebDavContainerExtension.Metadatas
         {
             if (itemMetadata.ExistsLocal)
             {
-                LocalStorage.CoordinatedDelete(itemMetadata.LocalItem);
+                LocalStorage.Delete(itemMetadata.LocalItem);
             }
 
             if (itemMetadata.ExistsOnServer)
@@ -234,23 +233,11 @@ namespace WebDavContainerExtension.Metadatas
 
         public FileMetadata WriteContentOnServer(FileMetadata createdFile, string fileUrlPath)
         {
-
-                var serverItem = createdFile.ServerFile;
-                serverItem.TimeOut = 36000000;
-                FileInfo file = new FileInfo(fileUrlPath);
-                using (Stream stream = serverItem.GetWriteStreamAsync(file.Length).GetAwaiter().GetResult())
-                using (FileStream fs = file.OpenRead())
-                {
-                    byte[] buffer = new byte[Bufsize];
-                    int bytesRead;
-
-                    while ((bytesRead = fs.Read(buffer, 0, Bufsize)) > 0)
-                        stream.Write(buffer, 0, bytesRead);
-                }
-
-                return GetFileMetadata(createdFile.Identifier);
-
-
+            var serverItem = createdFile.ServerFile;
+            serverItem.TimeOut = 36000000;
+            FileInfo file = new FileInfo(fileUrlPath);
+            serverItem.UploadAsync(fileUrlPath).GetAwaiter().GetResult();
+            return GetFileMetadata(createdFile.Identifier);
         }
 
         public FileMetadata UpdateFileLocal(FileMetadata item)
@@ -262,18 +249,15 @@ namespace WebDavContainerExtension.Metadatas
 
         public FileMetadata PushToServer(FileMetadata item)
         {
+            if(!item.ExistsOnServer)
+            {
+                item = this.CreateOnServer(item);
+            }
 
-                if(!item.ExistsOnServer)
-                {
-                    item = this.CreateOnServer(item);
-                }
+            item = WriteContentOnServer(item, item.LocalFile.Path);
 
-                item = WriteContentOnServer(item, item.LocalFile.Path);
-
-
-
-                item.LocalFile.Etag = item.ServerFile.Etag;
-                item.LocalFile.UploadError = null;
+            item.LocalFile.Etag = item.ServerFile.Etag;
+            item.LocalFile.UploadError = null;
 
 
             LocalStorage.UpdateFile(item.LocalFile);
@@ -283,7 +267,6 @@ namespace WebDavContainerExtension.Metadatas
         private FileMetadata CreateOnServer(FileMetadata item)
         {
             var parent = GetFolderMetadata(item.ParentIdentifier);
-
             return CreateFileOnServer(parent, item.Name);
         }
 
@@ -301,34 +284,31 @@ namespace WebDavContainerExtension.Metadatas
 
         public void PullFromServer(FileMetadata item)
         {
-            try
-            {
-                item.ServerFile.TimeOut = 36000000;
-                var serverItem = item.ServerFile;
-                using (Stream reader = serverItem.GetReadStreamAsync(0, serverItem.ContentLength).GetAwaiter().GetResult())
-                using (FileStream fs = new FileStream(item.LocalFile.Path, FileMode.Create, FileAccess.Write))
-                {
-                    byte[] buffer = new byte[Bufsize];
-                    int bytesRead;
-
-                    while ((bytesRead = reader.Read(buffer, 0, Bufsize)) > 0)
-                        fs.Write(buffer, 0, bytesRead);
-                }
-                item.LocalFile.Etag = item.ServerFile.Etag;
-                item.LocalFile.DownLoadError = null;
-
-            }
-            catch (Exception e)
-            {
-                item.LocalFile.DownLoadError = e;
-            }
-
+            var serverItem = item.ServerFile;
+            item.ServerFile.TimeOut = 36000000;
+            serverItem.DownloadAsync(item.LocalFile.Path).GetAwaiter().GetResult();
+            item.LocalFile.Etag = item.ServerFile.Etag;
             LocalStorage.UpdateFile(item.LocalFile);
         }
 
         public void DeleteLocal(ItemMetadata item)
         {
-            this.LocalStorage.CoordinatedDelete(item.LocalItem);
+            this.LocalStorage.Delete(item.LocalItem);
+        }
+
+        public void SetUploadError(NSUrl url, NSError localFileUploadError)
+        {
+            var localFile = this.LocalStorage.GetFile(url.Path);
+            localFile.UploadError = localFileUploadError;
+            localFile.Etag = null;
+            this.LocalStorage.UpdateFile(localFile);
+        }
+
+        public FileMetadata ResetLocalVersion(FileMetadata item)
+        {
+            item.LocalFile.Etag = null;
+            item = UpdateFileLocal(item);
+            return item;
         }
     }
 }
