@@ -1,10 +1,6 @@
-﻿using System;
-using WebDavContainerExtension.Metadatas;
+﻿using WebDavContainerExtension.Metadatas;
 using FileProvider;
 using Foundation;
-using ITHit.WebDAV.Client.Exceptions;
-using WebDavContainerExtension.Helpers;
-using WebDavContainerExtension.Storages;
 
 namespace WebDavContainerExtension.FileProviderItems
 {
@@ -43,8 +39,8 @@ namespace WebDavContainerExtension.FileProviderItems
             }
 
             IsDownloaded = fileMetadata.ExistsLocal;
-            IsMostRecentVersionDownloaded = fileMetadata.IsSyncByEtag && IsDownloaded;
-            IsUploaded = !fileMetadata.HasUploadError || fileMetadata.IsSyncByEtag;
+            IsMostRecentVersionDownloaded = fileMetadata.IsSyncByEtag && fileMetadata.ExistsLocal;
+            IsUploaded = !fileMetadata.HasUploadError && (fileMetadata.IsSyncByEtag || !fileMetadata.ExistsLocal);
             UploadingError = fileMetadata.LocalFile.UploadError;
         }
     }

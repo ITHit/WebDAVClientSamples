@@ -18,7 +18,7 @@ namespace WebDavContainer
             ServerSettings serverSettings = AppGroupSettings.GetServerSettings();
             if(serverSettings != null)
             {
-                Server.Text = serverSettings.ServerUri.ToString() ?? string.Empty;
+                Server.Text = serverSettings.ServerUri.ToString();
                 Username.Text = serverSettings.UserName ?? string.Empty;
                 Password.Text = serverSettings.Password ?? string.Empty;
             }
@@ -28,12 +28,6 @@ namespace WebDavContainer
 #endif
         }
 
-        public override void DidReceiveMemoryWarning()
-        {
-            base.DidReceiveMemoryWarning();
-            // Release any cached data, images, etc that aren't in use.
-        }
-
         partial void Login_Clicked(UIButton sender)
         {
             string serverUri = Server.Text;
@@ -41,7 +35,7 @@ namespace WebDavContainer
             string passWord = Password.Text;
 
 
-            if(String.IsNullOrEmpty(serverUri) || String.IsNullOrWhiteSpace(serverUri))
+            if(string.IsNullOrEmpty(serverUri) || string.IsNullOrWhiteSpace(serverUri))
             {
                 UIAlertView alert = new UIAlertView()
                 {
@@ -57,21 +51,23 @@ namespace WebDavContainer
             {
                 var serverSettings = new ServerSettings(serverUri, userName, passWord);
                 AppGroupSettings.SaveServerSettings(serverSettings);
-                UIAlertView alert = new UIAlertView()
+                var alert = new UIAlertView()
                 {
                     Title = "Login successful",
-                    Message = "Now you can open documents in MS Office or any other application from http://server/ via Location->Browse dialog and save back directly to server."
+                    Message = "Now you can open documents from your server in MS Office Mobile or any other application via Location->Browse dialog and save back directly to server."
                 };
+
                 alert.AddButton("Ok");
                 alert.Show();
             }
             catch(Exception ex)
             {
-                UIAlertView doneAlert = new UIAlertView()
+                var doneAlert = new UIAlertView()
                 {
                     Title = "Error",
                     Message = ex.Message
                 };
+
                 doneAlert.AddButton("Ok");
                 doneAlert.Show();
             }

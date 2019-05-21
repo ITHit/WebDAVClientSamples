@@ -1,8 +1,5 @@
-﻿using System.Runtime.Serialization;
-
-namespace WebDavContainerExtension.Storages
+﻿namespace WebDavContainerExtension.Storages
 {
-    [DataContract(Name = nameof(LocalItem))]
     public abstract class LocalItem
     {
 
@@ -16,13 +13,13 @@ namespace WebDavContainerExtension.Storages
 
         public bool IsFile => this is LocalFile;
 
-        public LocalItem(string localPath, bool exists)
+        protected LocalItem(string localPath, bool exists)
         {
             this.Path = localPath;
             this.IsExists = exists;
         }
 
-        public LocalItem()
+        protected LocalItem()
         {
         }
 

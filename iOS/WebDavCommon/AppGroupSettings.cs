@@ -12,9 +12,13 @@ namespace WebDavCommon
         public static ServerSettings GetServerSettings()
         {
             using (NSUrl userDataPath = GetSharedContainerUrl())
-            using (NSDictionary userData = NSDictionary.FromFile(Path.Combine(userDataPath.Path, ServerSettingFile)))
+            using (var userData = NSDictionary.FromFile(Path.Combine(userDataPath.Path, ServerSettingFile)))
             {
-                if (userData == null) return null;
+                if (userData == null)
+                {
+                    return null;
+                }
+
                 return ServerSettings.CreateFromNsDictionary(userData);
             }
         }
@@ -22,13 +26,21 @@ namespace WebDavCommon
         private static NSUrl GetSharedContainerUrl()
         {
             NSUrl userDataPath = NSFileManager.DefaultManager.GetContainerUrl(AppGroupId);
-            if (userDataPath == null) throw new AccessViolationException("Group container is null");
+            if (userDataPath == null)
+            {
+                throw new AccessViolationException("Group container is null");
+            }
+
             return userDataPath;
         }
 
         public static void SaveServerSettings(ServerSettings serverSettings)
         {
-            if (serverSettings == null) throw new ArgumentNullException(nameof(serverSettings));
+            if (serverSettings == null)
+            {
+                throw new ArgumentNullException(nameof(serverSettings));
+            }
+
             using (NSUrl userDataPath = GetSharedContainerUrl())
             using (NSDictionary data = serverSettings.ToNsDictionary())
             {

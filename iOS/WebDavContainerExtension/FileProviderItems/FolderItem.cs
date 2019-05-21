@@ -1,6 +1,5 @@
 ﻿using WebDavContainerExtension.Metadatas;
 using FileProvider;
-using Foundation;
 
 namespace WebDavContainerExtension.FileProviderItems
 {

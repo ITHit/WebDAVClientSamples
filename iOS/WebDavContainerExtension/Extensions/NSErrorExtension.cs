@@ -7,7 +7,11 @@ namespace WebDavContainerExtension.Extensions
     {
         public static NSErrorException AsException(this NSError error)
         {
-            if(error == null) throw new ArgumentNullException(nameof(error));
+            if(error == null)
+            {
+                throw new ArgumentNullException(nameof(error));
+            }
+
             return new NSErrorException(error);
         }
     }

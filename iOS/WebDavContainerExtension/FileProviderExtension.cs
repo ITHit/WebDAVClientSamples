@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net;
-using CoreGraphics;
 using FileProvider;
 using Foundation;
 using ITHit.WebDAV.Client;
@@ -20,11 +19,16 @@ using WebDavContainerExtension.Storages;
 
 namespace WebDavContainerExtension
 {
-    [Register("FileProviderExtension")]
+    [Register(nameof(FileProviderExtension))]
     class FileProviderExtension : NSFileProviderExtension
     {
         private const string StorageFolder = "Documents";
+
         public LocationMapper LocationMapper { get; }
+
+        public WebDavSessionAsync Session { get; }
+
+        public StorageManager StorageManager { get; }
 
         public FileProviderExtension()
         {
@@ -40,19 +44,20 @@ namespace WebDavContainerExtension
 #if !DEBUG
             FileLogger.Level = LogLevel.Off;
 #endif
-            var session = new WebDavSessionAsync
-            {
-            };
+            string license = @"<?xml version='1.0'...";
+            var session = new WebDavSessionAsync(license);
 
             if(serverSettings != null && serverSettings.HasCredential)
+            {
                 Session.Credentials = new NetworkCredential(serverSettings.UserName, serverSettings.Password);
+            }
 
             return session;
         }
 
         private string InitLocalStorage()
         {
-            using (NSUrl documentStorageUrl = NSFileProviderManager.DefaultManager.DocumentStorageUrl.Append(StorageFolder, isDirectory: true))
+            using (NSUrl documentStorageUrl = NSFileProviderManager.DefaultManager.DocumentStorageUrl.Append(StorageFolder, true))
             {
                 NSError error;
                 NSFileManager.DefaultManager.CreateDirectory(documentStorageUrl, true, null, out error);
@@ -65,12 +70,9 @@ namespace WebDavContainerExtension
             }
         }
 
-        public WebDavSessionAsync Session { get; private set; }
-        public StorageManager StorageManager { get; }
-
         /// <param name="url">The shared document's URL.</param>
         /// <param name="completionHandler">
-        ///   <para>An action the system calls subseqent to the creation of a placeholder.</para>
+        ///   <para>An action the system calls subsequent to the creation of a placeholder.</para>
         ///   <para tool="nullallowed">This parameter can be <see langword="null" />.</para>
         /// </param>
         /// <summary>When implemented by the developer, creates a specified placeholder for a previously defined URL.</summary>
@@ -89,8 +91,8 @@ namespace WebDavContainerExtension
                     completionHandler?.Invoke(NsErrorHelper.GetFileProviderNotFoundError(identifier));
                     return;
                 }
-                var placeholderUrl = NSFileProviderManager.GetPlaceholderUrl(url);
-                NSError error = null;
+                NSUrl placeholderUrl = NSFileProviderManager.GetPlaceholderUrl(url);
+                NSError error;
                 NSFileManager.DefaultManager.CreateDirectory(placeholderUrl.RemoveLastPathComponent(), true, null, out error);
                 if(error != null)
                 {
@@ -98,13 +100,12 @@ namespace WebDavContainerExtension
                     return;
                 }
 
-                var providerItem = ProviderItem.CreateFromMetadata(itemMetadata);
+                INSFileProviderItem providerItem = ProviderItem.CreateFromMetadata(itemMetadata);
                 NSFileProviderManager.WritePlaceholder(placeholderUrl, providerItem, out error);
                 completionHandler?.Invoke(error);
             }
             catch (Exception ex)
             {
-                ;
                 NSError error = this.MapError(ex);
                 completionHandler?.Invoke(error);
             }
@@ -141,17 +142,10 @@ namespace WebDavContainerExtension
         ///   <para tool="threads">This can be used from a background thread.</para>
         /// </remarks>
         public override string GetPersistentIdentifier(NSUrl itemUrl)
-        {
-            try
             {
                 string identifierFromLocalPath = this.LocationMapper.GetIdentifierFromLocalPath(itemUrl.Path);
                 return identifierFromLocalPath;
             }
-            catch(Exception e)
-            {
-                throw;
-            }
-        }
 
         /// <inheritdoc />
         /// <param name="persistentIdentifier">Persistent identifier for a document that is shared .</param>
@@ -163,15 +157,7 @@ namespace WebDavContainerExtension
         /// </remarks>
         public override NSUrl GetUrlForItem(string persistentIdentifier)
         {
-            try
-            {
-                NSUrl urlForItem = NSUrl.FromFilename(this.LocationMapper.GetLocalUrlFromIdentifier(persistentIdentifier));
-                return urlForItem;
-            }
-            catch(Exception e)
-            {
-                throw;
-            }
+            return NSUrl.FromFilename(this.LocationMapper.GetLocalUrlFromIdentifier(persistentIdentifier));
         }
 
         public override INSFileProviderEnumerator GetEnumerator(string containerItemIdentifier, out NSError error)
@@ -200,13 +186,17 @@ namespace WebDavContainerExtension
         /// </remarks>
         public override void ItemChangedAtUrl(NSUrl url)
         {
-            var identifier = this.GetPersistentIdentifier(url);
+            string identifier = this.GetPersistentIdentifier(url);
             try
             {
                 FileMetadata item = this.StorageManager.GetFileMetadata(identifier);
-                if (!item.ExistsLocal) throw NsErrorHelper.GetFileProviderNotFoundError().AsException();
+                if (!item.ExistsLocal)
+                {
+                    throw NsErrorHelper.GetFileProviderNotFoundError().AsException();
+                }
+
                 item = StorageManager.ResetLocalVersion(item);
-                item = this.StorageManager.PushToServer(item);
+                this.StorageManager.PushToServer(item);
             }
             catch(Exception e)
             {
@@ -235,7 +225,7 @@ namespace WebDavContainerExtension
 
         /// <param name="url">The shared document's URL.</param>
         /// <param name="completionHandler">
-        ///   <para>An action the system calls when the refernced file becomes available.</para>
+        ///   <para>An action the system calls when the referenced file becomes available.</para>
         ///   <para tool="nullallowed">This parameter can be <see langword="null" />.</para>
         /// </param>
         /// <summary>When implemented by the developer, supplies an actual file on a disk in place of a placeholder.</summary>
@@ -247,7 +237,7 @@ namespace WebDavContainerExtension
         {
             try
             {
-                var identifier = this.GetPersistentIdentifier(url);
+                string identifier = this.GetPersistentIdentifier(url);
                 FileMetadata item = this.StorageManager.GetFileMetadata(identifier);
                 if(item.HasUploadError)
                 {
@@ -266,7 +256,6 @@ namespace WebDavContainerExtension
             }
             catch (Exception ex)
             {
-                ;
                 NSError error = this.MapError(ex);
                 completionHandler?.Invoke(error);
             }
@@ -282,7 +271,7 @@ namespace WebDavContainerExtension
         {
             try
             {
-                var identifier = this.GetPersistentIdentifier(url);
+                string identifier = this.GetPersistentIdentifier(url);
                 FileMetadata item = this.StorageManager.GetFileMetadata(identifier);
                 if(!item.LocalFile.HasEtag)
                 {
@@ -318,7 +307,7 @@ namespace WebDavContainerExtension
                 completionHandler?.Invoke(ProviderItem.CreateFromMetadata(createdFolder), null);
                 this.StorageManager.NotifyEnumerator(parentItemIdentifier);
             }
-            catch (MethodNotAllowedException ex)
+            catch (MethodNotAllowedException)
             {
                 completionHandler?.Invoke(null, NsErrorHelper.GetFileProviderDuplicateException());
             }
@@ -350,7 +339,7 @@ namespace WebDavContainerExtension
                 this.StorageManager.DeleteEveryWhere(metadata);
                 completionHandler?.Invoke(null);
             }
-            catch (MethodNotAllowedException ex)
+            catch (MethodNotAllowedException)
             {
                 completionHandler?.Invoke( NsErrorHelper.GetFileProviderDuplicateException());
             }
@@ -364,7 +353,7 @@ namespace WebDavContainerExtension
         /// <param name="fileUrl">The URL for the file.</param>
         /// <param name="parentItemIdentifier">The parent directory's persistent identifier.</param>
         /// <param name="completionHandler">A handler to run after the operation completes.</param>
-        /// <summary>When implemented by the developer, imports the resource at the specified <paramref name="fileURL" /> into the directory that is identified by <paramref name="parentItemIdentifier" />.</summary>
+        /// <summary>When implemented by the developer, imports the resource at the specified <paramref name="fileUrl" /> into the directory that is identified by <paramref name="parentItemIdentifier" />.</summary>
         /// <remarks>
         ///   <para>(More documentation for this node is coming)</para>
         ///   <para tool="threads">This can be used from a background thread.</para>
@@ -374,14 +363,14 @@ namespace WebDavContainerExtension
             try
             {
                 fileUrl.StartAccessingSecurityScopedResource();
-                var parentMetadata = StorageManager.GetFolderMetadata(parentItemIdentifier);
+                FolderMetadata parentMetadata = StorageManager.GetFolderMetadata(parentItemIdentifier);
                 if(!parentMetadata.IsExists)
                 {
                     completionHandler?.Invoke(null, NsErrorHelper.GetFileProviderNotFoundError(parentItemIdentifier));
                     return;
                 }
 
-                var existsNames = StorageManager.GetFolderChildrenMetadatas(parentMetadata).Select(x => x.Name);
+                IEnumerable<string> existsNames = StorageManager.GetFolderChildrenMetadatas(parentMetadata).Select(x => x.Name);
                 string fileName = GetNewFileName(fileUrl.LastPathComponent, existsNames);
                 FileMetadata createdFile = StorageManager.CreateFileOnServer(parentMetadata, fileName);
                 createdFile = StorageManager.WriteContentOnServer(createdFile, fileUrl.Path);
@@ -402,7 +391,11 @@ namespace WebDavContainerExtension
         private string GetNewFileName(string fileName, IEnumerable<string> existsNames)
         {
             var nameSet = existsNames.ToHashSet();
-            if (!nameSet.Contains(fileName)) return fileName;
+            if (!nameSet.Contains(fileName))
+            {
+                return fileName;
+            }
+
             string filenameWithoutExtension = Path.GetFileNameWithoutExtension(fileName);
             string extension = Path.GetExtension(fileName);
             int i = 1;
@@ -449,17 +442,17 @@ namespace WebDavContainerExtension
                 FolderMetadata destinationFolder = this.StorageManager.GetFolderMetadata(destParentItemIdentifier);
                 string name = newName ?? item.Name;
                 this.StorageManager.MoveItemOnServer(item, destinationFolder, name);
-                var oldParentIdentifier = item.ParentIdentifier;
+                string oldParentIdentifier = item.ParentIdentifier;
                 item.ParentIdentifier = destParentItemIdentifier;
                 item.Name = name;
                 completionHandler(ProviderItem.CreateFromMetadata(item), null);
                 this.StorageManager.NotifyEnumerator(oldParentIdentifier, item.ParentIdentifier);
             }
-            catch (PreconditionFailedException ex)
+            catch (PreconditionFailedException)
             {
                 completionHandler?.Invoke(null, NsErrorHelper.GetFileProviderDuplicateException());
             }
-            catch (ForbiddenException ex)
+            catch (ForbiddenException)
             {
                 completionHandler?.Invoke(null, NsErrorHelper.GetFileProviderDuplicateException());
             }

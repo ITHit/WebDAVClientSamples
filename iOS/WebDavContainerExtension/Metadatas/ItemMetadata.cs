@@ -16,7 +16,7 @@ namespace WebDavContainerExtension.Metadatas
         public bool IsFolder => this is FolderMetadata;
         public bool IsFile => this is FileMetadata;
 
-        public ItemMetadata(string identifier, string parentIdentifier, string name, LocalItem localItem, IHierarchyItemAsync serverItem = null)
+        protected ItemMetadata(string identifier, string parentIdentifier, string name, LocalItem localItem, IHierarchyItemAsync serverItem = null)
         {
             this.Identifier = identifier;
             this.ParentIdentifier = parentIdentifier;

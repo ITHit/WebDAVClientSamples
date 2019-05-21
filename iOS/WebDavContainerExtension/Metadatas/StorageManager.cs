@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using FileProvider;
 using Foundation;
@@ -26,9 +25,9 @@ namespace WebDavContainerExtension.Metadatas
 
         public void NotifyEnumerator(params string[] itemIdentifiers)
         {
-           foreach (var itemIdentifier in itemIdentifiers)
+            foreach(string itemIdentifier in itemIdentifiers)
             {
-                NSFileProviderManager.DefaultManager.SignalEnumerator(itemIdentifier,error => { });
+                NSFileProviderManager.DefaultManager.SignalEnumerator(itemIdentifier, error => { });
             }
         }
 
@@ -38,14 +37,14 @@ namespace WebDavContainerExtension.Metadatas
             {
                 Uri serverUri = LocationMapper.GetServerUriFromIdentifier(itemIdentifier);
                 IFolderAsync serverItem = Session.OpenFolderAsync(serverUri)
-                                                       .GetAwaiter()
-                                                       .GetResult();
+                                                 .GetAwaiter()
+                                                 .GetResult();
 
                 string localPath = LocationMapper.GetLocalUrlFromIdentifier(itemIdentifier);
                 LocalFolder localItem = this.LocalStorage.GetFolder(localPath);
                 return this.CreateFolderMetadata(itemIdentifier, localItem, serverItem);
             }
-            catch (NotFoundException)
+            catch(NotFoundException)
             {
                 var localPath = LocationMapper.GetLocalUrlFromIdentifier(itemIdentifier);
                 LocalFolder localItem = this.LocalStorage.GetFolder(localPath);
@@ -63,11 +62,11 @@ namespace WebDavContainerExtension.Metadatas
         public FolderMetadata CreateFolderOnServer(FolderMetadata folderMetadata, string directoryName)
         {
             IFolderAsync newFolder = folderMetadata.ServerFolder.CreateFolderAsync(directoryName)
-                                                    .GetAwaiter()
-                                                    .GetResult();
+                                                   .GetAwaiter()
+                                                   .GetResult();
 
-            var id = LocationMapper.GetIdentifierFromServerUri(newFolder.Href);
-            var localPath = LocationMapper.GetLocalUrlFromIdentifier(id);
+            string id = LocationMapper.GetIdentifierFromServerUri(newFolder.Href);
+            string localPath = LocationMapper.GetLocalUrlFromIdentifier(id);
             LocalFolder localItem = this.LocalStorage.GetFolder(localPath);
             return CreateFolderMetadata(id, localItem, newFolder);
         }
@@ -84,21 +83,20 @@ namespace WebDavContainerExtension.Metadatas
 
         public FileMetadata GetFileMetadata(string itemIdentifier)
         {
-
             try
             {
                 Uri serverUri = LocationMapper.GetServerUriFromIdentifier(itemIdentifier);
                 IFileAsync serverItem = Session.OpenFileAsync(serverUri)
-                                                       .GetAwaiter()
-                                                       .GetResult();
+                                               .GetAwaiter()
+                                               .GetResult();
 
                 string localPath = LocationMapper.GetLocalUrlFromIdentifier(itemIdentifier);
                 LocalFile localItem = this.LocalStorage.GetFile(localPath);
                 return this.CreateFileMetadata(itemIdentifier, localItem, serverItem);
             }
-            catch (NotFoundException)
+            catch(NotFoundException)
             {
-                var localPath = LocationMapper.GetLocalUrlFromIdentifier(itemIdentifier);
+                string localPath = LocationMapper.GetLocalUrlFromIdentifier(itemIdentifier);
                 LocalFile localItem = this.LocalStorage.GetFile(localPath);
                 return this.CreateFileMetadata(itemIdentifier, localItem);
             }
@@ -108,50 +106,56 @@ namespace WebDavContainerExtension.Metadatas
         {
             string parentIdentifier = LocationMapper.GetParentIdentifier(itemIdentifier);
             string name = GetItemDisplayName(itemIdentifier, serverItem);
-            return new FileMetadata(itemIdentifier, parentIdentifier, name,localItem, serverItem);
+            return new FileMetadata(itemIdentifier, parentIdentifier, name, localItem, serverItem);
         }
 
 
         public void DeleteEveryWhere(ItemMetadata itemMetadata)
         {
-            if (itemMetadata.ExistsLocal)
+            if(itemMetadata.ExistsLocal)
             {
                 LocalStorage.Delete(itemMetadata.LocalItem);
             }
 
-            if (itemMetadata.ExistsOnServer)
+            if(itemMetadata.ExistsOnServer)
             {
                 try
                 {
                     itemMetadata.ServerItem.DeleteAsync().GetAwaiter().GetResult();
                 }
-                catch (NotFoundException) { };
+                catch(NotFoundException)
+                {
+                }
             }
         }
 
         public ItemMetadata[] GetFolderChildrenMetadatas(FolderMetadata folderMetadata)
         {
             IHierarchyItemAsync[] serverItems;
-            if (folderMetadata.ExistsOnServer)
+            if(folderMetadata.ExistsOnServer)
+            {
                 try
                 {
                     serverItems = folderMetadata.ServerFolder.GetChildrenAsync(false)
-                                                           .GetAwaiter()
-                                                           .GetResult();
+                                                .GetAwaiter()
+                                                .GetResult();
                 }
-                catch (NotFoundException)
+                catch(NotFoundException)
                 {
                     serverItems = new IHierarchyItemAsync[0];
-                } else
+                }
+            }
+            else
             {
                 serverItems = new IHierarchyItemAsync[0];
             }
 
             LocalItem[] localItems;
-            if (folderMetadata.ExistsLocal)
+            if(folderMetadata.ExistsLocal)
             {
                 localItems = LocalStorage.GetFolderContent(folderMetadata.LocalFolder);
-            } else
+            }
+            else
             {
                 localItems = new LocalItem[0];
             }
@@ -165,8 +169,8 @@ namespace WebDavContainerExtension.Metadatas
             var result = new List<ItemMetadata>();
             foreach(IHierarchyItemAsync hierarchyItemAsync in serverItems)
             {
-                var localUrl = LocationMapper.GetLocalUrlFromServerUri(hierarchyItemAsync.Href);
-                var identifier = LocationMapper.GetIdentifierFromServerUri(hierarchyItemAsync.Href);
+                string localUrl = LocationMapper.GetLocalUrlFromServerUri(hierarchyItemAsync.Href);
+                string identifier = LocationMapper.GetIdentifierFromServerUri(hierarchyItemAsync.Href);
                 if(hierarchyItemAsync is IFolderAsync folder)
                 {
                     if(localDictionary.ContainsKey(localUrl) && localDictionary[localUrl].IsFolder)
@@ -182,31 +186,31 @@ namespace WebDavContainerExtension.Metadatas
                     result.Add(new FolderMetadata(identifier, parentIdentifier, name1, localItem1, folder));
                 }
 
-                if (hierarchyItemAsync is IFileAsync file)
+                if(hierarchyItemAsync is IFileAsync file)
                 {
-                    if (localDictionary.ContainsKey(localUrl) && localDictionary[localUrl].IsFile)
+                    if(localDictionary.ContainsKey(localUrl) && localDictionary[localUrl].IsFile)
                     {
                         LocalFile localItem = localDictionary[localUrl].AsFile();
                         string name = GetItemDisplayName(identifier, file);
-                        result.Add(new FileMetadata(identifier, parentIdentifier, name,localItem, file));
+                        result.Add(new FileMetadata(identifier, parentIdentifier, name, localItem, file));
                         localDictionary.Remove(localUrl);
                     }
 
                     LocalFile localItem1 = LocalStorage.GetFile(localUrl);
                     string name1 = GetItemDisplayName(identifier, file);
-                    result.Add(new FileMetadata(identifier, parentIdentifier, name1,localItem1, file));
+                    result.Add(new FileMetadata(identifier, parentIdentifier, name1, localItem1, file));
                 }
             }
 
             foreach(KeyValuePair<string, LocalItem> dictionaryItem in localDictionary)
             {
-                var identifier = LocationMapper.GetIdentifierFromLocalPath(dictionaryItem.Key);
+                string identifier = LocationMapper.GetIdentifierFromLocalPath(dictionaryItem.Key);
                 if(dictionaryItem.Value.IsFile)
                 {
                     result.Add(CreateFileMetadata(identifier, dictionaryItem.Value.AsFile()));
                 }
 
-                if (dictionaryItem.Value.IsFolder)
+                if(dictionaryItem.Value.IsFolder)
                 {
                     result.Add(CreateFolderMetadata(identifier, dictionaryItem.Value.AsFolder()));
                 }
@@ -223,28 +227,26 @@ namespace WebDavContainerExtension.Metadatas
         public FileMetadata CreateFileOnServer(FolderMetadata parentMetadata, string fileName)
         {
             IFileAsync newFile = parentMetadata.ServerFolder.CreateFileAsync(fileName, null).GetAwaiter().GetResult();
-            var identifier = LocationMapper.GetIdentifierFromServerUri(newFile.Href);
-            var localPath = LocationMapper.GetLocalUrlFromIdentifier(identifier);
+            string identifier = LocationMapper.GetIdentifierFromServerUri(newFile.Href);
+            string localPath = LocationMapper.GetLocalUrlFromIdentifier(identifier);
             LocalFile localItem = LocalStorage.GetFile(localPath);
             string name = GetItemDisplayName(identifier, newFile);
-            return new FileMetadata(identifier, parentMetadata.Identifier, name,localItem, newFile);
-
+            return new FileMetadata(identifier, parentMetadata.Identifier, name, localItem, newFile);
         }
 
         public FileMetadata WriteContentOnServer(FileMetadata createdFile, string fileUrlPath)
         {
-            var serverItem = createdFile.ServerFile;
+            IFileAsync serverItem = createdFile.ServerFile;
             serverItem.TimeOut = 36000000;
-            FileInfo file = new FileInfo(fileUrlPath);
             serverItem.UploadAsync(fileUrlPath).GetAwaiter().GetResult();
             return GetFileMetadata(createdFile.Identifier);
         }
 
         public FileMetadata UpdateFileLocal(FileMetadata item)
         {
-            var localFile = LocalStorage.UpdateFile(item.LocalFile);
+            LocalFile localFile = LocalStorage.UpdateFile(item.LocalFile);
             string name = GetItemDisplayName(item.Identifier, item.ServerFile);
-            return new FileMetadata(item.Identifier, item.ParentIdentifier, name,localFile, item.ServerFile);
+            return new FileMetadata(item.Identifier, item.ParentIdentifier, name, localFile, item.ServerFile);
         }
 
         public FileMetadata PushToServer(FileMetadata item)
@@ -255,36 +257,33 @@ namespace WebDavContainerExtension.Metadatas
             }
 
             item = WriteContentOnServer(item, item.LocalFile.Path);
-
             item.LocalFile.Etag = item.ServerFile.Etag;
             item.LocalFile.UploadError = null;
-
-
             LocalStorage.UpdateFile(item.LocalFile);
             return item;
         }
 
         private FileMetadata CreateOnServer(FileMetadata item)
         {
-            var parent = GetFolderMetadata(item.ParentIdentifier);
+            FolderMetadata parent = GetFolderMetadata(item.ParentIdentifier);
             return CreateFileOnServer(parent, item.Name);
         }
 
         private FolderMetadata CreateOnServer(FolderMetadata item)
         {
-            var parent = GetFolderMetadata(item.ParentIdentifier);
+            FolderMetadata parent = GetFolderMetadata(item.ParentIdentifier);
             return CreateFolderOnServer(parent, item.Name);
         }
 
 
         public void MoveItemOnServer(ItemMetadata item, FolderMetadata destinationFolder, string name)
         {
-            item.ServerItem.MoveToAsync(destinationFolder.ServerFolder, name, false,null).GetAwaiter().GetResult();
+            item.ServerItem.MoveToAsync(destinationFolder.ServerFolder, name, false, null).GetAwaiter().GetResult();
         }
 
         public void PullFromServer(FileMetadata item)
         {
-            var serverItem = item.ServerFile;
+            IFileAsync serverItem = item.ServerFile;
             item.ServerFile.TimeOut = 36000000;
             serverItem.DownloadAsync(item.LocalFile.Path).GetAwaiter().GetResult();
             item.LocalFile.Etag = item.ServerFile.Etag;
@@ -298,7 +297,7 @@ namespace WebDavContainerExtension.Metadatas
 
         public void SetUploadError(NSUrl url, NSError localFileUploadError)
         {
-            var localFile = this.LocalStorage.GetFile(url.Path);
+            LocalFile localFile = this.LocalStorage.GetFile(url.Path);
             localFile.UploadError = localFileUploadError;
             localFile.Etag = null;
             this.LocalStorage.UpdateFile(localFile);

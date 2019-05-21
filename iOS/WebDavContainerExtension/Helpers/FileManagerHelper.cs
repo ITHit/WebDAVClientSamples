@@ -7,11 +7,7 @@ namespace WebDavContainerExtension.Helpers
 {
     public class NSFileManagerHelper
     {
-        const string BackupKey = "com.apple.MobileBackup";
-
         private const string LibsystemKernelDylib = "/usr/lib/system/libsystem_kernel.dylib";
-
-        static bool _xattrCompatibility;
 
         /// <summary>
         /// Errno for not existing attribute.
@@ -26,7 +22,6 @@ namespace WebDavContainerExtension.Helpers
 
         static NSFileManagerHelper()
         {
-            _xattrCompatibility = true; //!UIDevice.CurrentDevice.CheckSystemVersion (5, 1);
         }
 
 
@@ -38,7 +33,7 @@ namespace WebDavContainerExtension.Helpers
         /// <exception cref="ArgumentNullException">Throw when path is null or empty.</exception>
         public static bool IsExtendedAttributesSupported(string path)
         {
-            if(string.IsNullOrEmpty(path))
+            if (string.IsNullOrEmpty(path))
             {
                 throw new ArgumentNullException(nameof(path));
             }
@@ -57,20 +52,50 @@ namespace WebDavContainerExtension.Helpers
         /// <exception cref="IOException">Throw when file or attribute is no available.</exception>
         public static string GetExtendedAttribute(string path, string attrName)
         {
-            if(string.IsNullOrEmpty(path))
+            if (string.IsNullOrEmpty(path))
             {
                 throw new ArgumentNullException(nameof(path));
             }
 
-            if(string.IsNullOrEmpty(attrName))
+            if (string.IsNullOrEmpty(attrName))
+            {
+                throw new ArgumentNullException(nameof(attrName));
+            }
+
+            byte[] buffer = GetExtendedAttributeBytes(path, attrName);
+            if (buffer != null)
+            {
+                return Encoding.UTF8.GetString(buffer);
+            }
+
+            return null;
+        }
+
+
+        /// <summary>
+        /// Reads extended attribute as <see cref="T:byte[]" />.
+        /// </summary>
+        /// <param name="path">File or folder path.</param>
+        /// <param name="attrName">Attribute name.</param>
+        /// <returns><see cref="T:byte[]" /></returns>
+        /// <exception cref="ArgumentNullException">Throw when path is null or empty or attrName is null or empty.</exception>
+        /// <exception cref="IOException">Throw when file or attribute is no available.</exception>
+        public static byte[] GetExtendedAttributeBytes(string path, string attrName)
+        {
+            if (string.IsNullOrEmpty(path))
+            {
+                throw new ArgumentNullException(nameof(path));
+            }
+
+            if (string.IsNullOrEmpty(attrName))
             {
                 throw new ArgumentNullException(nameof(attrName));
             }
 
             long attributeSize = GetXAttr(path, attrName, null, 0, 0, 0);
-            if(attributeSize == -1)
+            if (attributeSize == -1)
             {
-                if(Marshal.GetLastWin32Error() == AttributeNotFoundErrno)
+                if (Marshal.GetLastWin32Error() == AttributeNotFoundErrno)
                 {
                     return null;
                 }
@@ -81,13 +106,12 @@ namespace WebDavContainerExtension.Helpers
             byte[] buffer = new byte[attributeSize];
             long readLength = GetXAttr(path, attrName, buffer, attributeSize, 0, 0);
 
-            if(readLength == -1)
+            if (readLength == -1)
             {
                 ThrowLastException(path, attrName);
             }
 
-            string attributeValue = Encoding.UTF8.GetString(buffer);
-            return attributeValue;
+            return buffer;
         }
 
         /// <summary>
@@ -100,19 +124,43 @@ namespace WebDavContainerExtension.Helpers
         /// <exception cref="IOException">Throw when file or attribute is no available.</exception>
         public static void SetExtendedAttribute(string path, string attrName, string attrValue)
         {
-            if(string.IsNullOrEmpty(path))
+            if (string.IsNullOrEmpty(path))
             {
                 throw new ArgumentNullException(nameof(path));
             }
 
-            if(string.IsNullOrEmpty(attrName))
+            if (string.IsNullOrEmpty(attrName))
             {
                 throw new ArgumentNullException(nameof(attrName));
             }
 
             byte[] buffer = Encoding.UTF8.GetBytes(attrValue);
+            SetExtendedAttributeBytes(path, attrName, buffer);
+        }
+
+
+        /// <summary>
+        /// Writes extended attribute as <see cref="T:byte[]" />.
+        /// </summary>
+        /// <param name="path">File or folder path.</param>
+        /// <param name="attrName">Attribute name.</param>
+        /// <param name="buffer">Attribute value.</param>
+        /// <exception cref="ArgumentNullException">Throw when path is null or empty or attrName is null or empty.</exception>
+        /// <exception cref="IOException">Throw when file or attribute is no available.</exception>
+        public static void SetExtendedAttributeBytes(string path, string attrName, byte[] buffer)
+        {
+            if (string.IsNullOrEmpty(path))
+            {
+                throw new ArgumentNullException(nameof(path));
+            }
+
+            if (string.IsNullOrEmpty(attrName))
+            {
+                throw new ArgumentNullException(nameof(attrName));
+            }
+
             long result = SetXAttr(path, attrName, buffer, buffer.Length, 0, 0);
-            if(result == -1)
+            if (result == -1)
             {
                 ThrowLastException(path, attrName);
             }
@@ -125,18 +173,18 @@ namespace WebDavContainerExtension.Helpers
         /// <param name="attrName">Attribute name.</param>
         public static void DeleteExtendedAttribute(string path, string attrName)
         {
-            if(string.IsNullOrEmpty(path))
+            if (string.IsNullOrEmpty(path))
             {
                 throw new ArgumentNullException(nameof(path));
             }
 
-            if(string.IsNullOrEmpty(attrName))
+            if (string.IsNullOrEmpty(attrName))
             {
                 throw new ArgumentNullException(nameof(attrName));
             }
 
             long result = RemoveXAttr(path, attrName, 0);
-            if(result == -1)
+            if (result == -1)
             {
                 ThrowLastException(path, attrName);
             }

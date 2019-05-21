@@ -2,21 +2,21 @@
 using System.IO;
 using System.Linq;
 using System.Runtime.Serialization;
-using System.Xml;
 using WebDavContainerExtension.Extensions;
 using Foundation;
 using WebDavContainerExtension.Helpers;
+using System.Runtime.Serialization.Formatters.Binary;
 
 namespace WebDavContainerExtension.Storages
 {
     public class LocalStorage
     {
-        private readonly DataContractSerializer _fileExtendedAttributeSerializer;
+        private readonly IFormatter _fileExtendedAttributeSerializer;
         private const string ExtendedAttributeKey = "FsExtensionMetadata";
 
         public LocalStorage()
         {
-            _fileExtendedAttributeSerializer = new DataContractSerializer(typeof(FileExtendedAttribute));
+            _fileExtendedAttributeSerializer = new BinaryFormatter();
         }
 
         private LocalFile GetFile(string localPath, bool isExists)
@@ -38,7 +38,7 @@ namespace WebDavContainerExtension.Storages
                 return LocalFile.CreateExists(localPath, fileSize, fileExtendedAttribute);
 
                     }
-            catch(SerializationException)
+            catch (SerializationException)
             {
                 NSFileManagerHelper.DeleteExtendedAttribute(localPath, ExtendedAttributeKey);
                 return LocalFile.CreateExists(localPath, fileSize);
@@ -52,16 +52,15 @@ namespace WebDavContainerExtension.Storages
                 throw new ArgumentNullException(nameof(localPath));
             }
 
-            string extendedAttributes = NSFileManagerHelper.GetExtendedAttribute(localPath, ExtendedAttributeKey);
-            if (string.IsNullOrEmpty(extendedAttributes))
+            byte[] extendedAttribute = NSFileManagerHelper.GetExtendedAttributeBytes(localPath, ExtendedAttributeKey);
+            if (extendedAttribute == null)
             {
                 return null;
-        }
-
-            using (TextReader stringReader = new StringReader(extendedAttributes))
-            using (XmlReader xmlReader = new XmlTextReader(stringReader))
+            }
+        
+            using (MemoryStream stream = new MemoryStream(extendedAttribute))
             {
-                return (FileExtendedAttribute)_fileExtendedAttributeSerializer.ReadObject(xmlReader);
+                return (FileExtendedAttribute)_fileExtendedAttributeSerializer.Deserialize(stream);
             }
         }
 
@@ -119,12 +118,12 @@ namespace WebDavContainerExtension.Storages
 
         private void WriteFileExtendedAttribute(LocalFile itemLocalItem, FileExtendedAttribute fileExtendedAttribute)
         {
-            using (TextWriter writer = new StringWriter())
-            using (var xmlWriter = new XmlTextWriter(writer))
+            using (MemoryStream stream = new MemoryStream())
             {
-                _fileExtendedAttributeSerializer.WriteObject(xmlWriter, fileExtendedAttribute);
-                xmlWriter.Flush();
-                NSFileManagerHelper.SetExtendedAttribute(itemLocalItem.Path, ExtendedAttributeKey, writer.ToString());
+                _fileExtendedAttributeSerializer.Serialize(stream, fileExtendedAttribute);
+                stream.Flush();
+                stream.Position = 0;
+                NSFileManagerHelper.SetExtendedAttributeBytes(itemLocalItem.Path, ExtendedAttributeKey, stream.ToArray());
             }
         }
 

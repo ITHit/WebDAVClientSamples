@@ -10,10 +10,7 @@ namespace WebDavContainerExtension.Metadatas
 
         public IFileAsync ServerFile { get; set; }
 
-        public bool IsSyncByEtag
-        {
-            get { return ExistsOnServer && LocalFile.Etag == ServerFile.Etag; }
-        }
+        public bool IsSyncByEtag => ExistsOnServer && LocalFile.Etag == ServerFile.Etag;
 
         public ulong Size
         {

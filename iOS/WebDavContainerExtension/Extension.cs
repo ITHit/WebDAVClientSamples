@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Net;
 using System.Runtime.InteropServices;
-using FileProvider;
 using Foundation;
 using MobileCoreServices;
 using ObjCRuntime;
@@ -17,14 +16,14 @@ namespace WebDavContainerExtension
     public static class Extension
     {
         [DllImport(Constants.MobileCoreServicesLibrary, EntryPoint = "UTTypeCreatePreferredIdentifierForTag")]
-        public static extern IntPtr UTTypeCreatePreferredIdentifierForTag(IntPtr tagClass, IntPtr tag, IntPtr uti);
+        private static extern IntPtr UTTypeCreatePreferredIdentifierForTag(IntPtr tagClass, IntPtr tag, IntPtr uti);
 
 
         public static string GetUTType(string fileExtension)
         {
             fileExtension = fileExtension.Substring(1);
             NSString classRef = new NSString(UTType.TagClassFilenameExtension);
-            NSString mimeRef = new NSString(fileExtension);
+            var mimeRef = new NSString(fileExtension);
 
             IntPtr utiRef = UTTypeCreatePreferredIdentifierForTag(classRef.Handle, mimeRef.Handle, IntPtr.Zero);
 
@@ -36,7 +35,7 @@ namespace WebDavContainerExtension
         public static string Decode(string source)
         {
             string[] sourceElements = source.Split('/');
-            List<string> resultElements = new List<string>();
+            var resultElements = new List<string>();
             foreach(string element in sourceElements)
             {
                 resultElements.Add(WebUtility.UrlDecode(element));
@@ -50,7 +49,7 @@ namespace WebDavContainerExtension
         public static string Encode(string source)
         {
             string[] sourceElements = source.Split('/');
-            List<string> resultElements = new List<string>();
+            var resultElements = new List<string>();
             foreach(string element in sourceElements)
             {
                 resultElements.Add(WebUtility.UrlEncode(element));
@@ -72,7 +71,6 @@ namespace WebDavContainerExtension
                     baseType += ".folder";
                     break;
                 }
-                    ;
                 default:
                 {
                     string fileExtension = Path.GetExtension(itemName);

@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Linq;
 using FileProvider;
 using Foundation;
 using ITHit.WebDAV.Client.Exceptions;
@@ -45,15 +44,15 @@ namespace WebDavContainerExtension.FileProviderEnumerators
                 observer.DidEnumerateItems(new[] {item});
                 observer.FinishEnumerating((NSData) null);
             }
-            catch(UnauthorizedException ex)
+            catch(UnauthorizedException)
             {
                 observer.FinishEnumerating(NsErrorHelper.GetFileProviderNotFoundError(this.EnumeratedItemIdentifier));
             }
-            catch(WebDavHttpException ex)
+            catch(WebDavHttpException)
             {
                 observer.FinishEnumerating(NsErrorHelper.GetUnspecifiedServerError());
             }
-            catch(Exception ex)
+            catch(Exception)
             {
                 observer.FinishEnumerating(NsErrorHelper.GetUnspecifiedErrorError());
             }
@@ -75,15 +74,15 @@ namespace WebDavContainerExtension.FileProviderEnumerators
                 observer.DidUpdateItems(new[] { ProviderItem.CreateFromMetadata(metadata) });
                 observer.FinishEnumeratingChanges(this.GetNsDataFromUint(this.SyncAnchor++), false);
             }
-            catch(UnauthorizedException ex)
+            catch(UnauthorizedException)
             {
                 observer.FinishEnumerating(NsErrorHelper.GetFileProviderUnauthorizedError());
             }
-            catch(WebDavHttpException ex)
+            catch(WebDavHttpException)
             {
                 observer.FinishEnumerating(NsErrorHelper.GetUnspecifiedServerError());
             }
-            catch(Exception ex)
+            catch(Exception)
             {
                 observer.FinishEnumerating(NsErrorHelper.GetUnspecifiedErrorError());
             }

@@ -49,15 +49,15 @@ namespace WebDavContainerExtension.FileProviderEnumerators
                 observer.DidEnumerateItems(items);
                 observer.FinishEnumerating((NSData) null);
             }
-            catch (UnauthorizedException ex)
+            catch (UnauthorizedException)
             {
                 observer.FinishEnumerating(NsErrorHelper.GetFileProviderUnauthorizedError());
             }
-            catch (WebDavHttpException ex)
+            catch (WebDavHttpException)
             {
                 observer.FinishEnumerating(NsErrorHelper.GetUnspecifiedServerError());
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 observer.FinishEnumerating(NsErrorHelper.GetUnspecifiedErrorError());
             }
@@ -86,15 +86,15 @@ namespace WebDavContainerExtension.FileProviderEnumerators
                 this.SyncAnchor = this.changeTracker.AddChangeSet(metadatas);
                 observer.FinishEnumeratingChanges(this.GetCurrentAnchorNsData(this.SyncAnchor), false);
             }
-            catch (UnauthorizedException ex)
+            catch (UnauthorizedException)
             {
                 observer.FinishEnumerating(NsErrorHelper.GetFileProviderUnauthorizedError());
             }
-            catch (WebDavHttpException ex)
+            catch (WebDavHttpException)
             {
                 observer.FinishEnumerating(NsErrorHelper.GetUnspecifiedServerError());
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 observer.FinishEnumerating(NsErrorHelper.GetUnspecifiedErrorError());
             }

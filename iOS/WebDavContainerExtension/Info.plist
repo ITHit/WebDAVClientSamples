@@ -3,7 +3,7 @@
 <plist version="1.0">
 <dict>
 	<key>CFBundleDisplayName</key>
-	<string>WebDAV Client</string>
+	<string>IT Hit WebDAV Client</string>
 	<key>CFBundleExecutable</key>
 	<string>WebDavContainerExtension</string>
 	<key>CFBundleIdentifier</key>
@@ -47,6 +47,6 @@
 		<string>arm64</string>
 	</array>
 	<key>CFBundleVersion</key>
-	<string>1032</string>
+	<string>1034</string>
 </dict>
 </plist>

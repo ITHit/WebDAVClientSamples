@@ -12,7 +12,11 @@ namespace WebDavCommon
 
         public ServerSettings(string serverUri, string userName = "", string password = "")
         {
-            if(string.IsNullOrEmpty(serverUri)) throw new ArgumentException(serverUri);
+            if(string.IsNullOrEmpty(serverUri))
+            {
+                throw new ArgumentException(serverUri);
+            }
+
             ServerUri = new Uri(serverUri);
             UserName = userName;
             Password = password;
@@ -22,7 +26,11 @@ namespace WebDavCommon
 
         public static ServerSettings CreateFromNsDictionary(NSDictionary userDataDictionary)
         {
-            if(userDataDictionary == null) throw new ArgumentNullException(nameof(userDataDictionary));
+            if(userDataDictionary == null)
+            {
+                throw new ArgumentNullException(nameof(userDataDictionary));
+            }
+
             NSObject serverUrl = userDataDictionary.ValueForKey((NSString) "ServerUri");
             NSObject userName = userDataDictionary.ValueForKey((NSString) "UserName");
             NSObject passWord = userDataDictionary.ValueForKey((NSString) "PassWord");

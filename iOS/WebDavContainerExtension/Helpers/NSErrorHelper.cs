@@ -10,7 +10,7 @@ namespace WebDavContainerExtension.Helpers
     {
         public static NSError GetFileProviderError(NSFileProviderError nsFileProviderError)
         {
-            var errorDomain = nsFileProviderError.GetDomain();
+            NSString errorDomain = nsFileProviderError.GetDomain();
             return new NSError(errorDomain, (int)nsFileProviderError);
         }
 
@@ -30,7 +30,7 @@ namespace WebDavContainerExtension.Helpers
         public static NSError GetFileProviderNotFoundError(string id)
         {
             var userInfo = new NSDictionary(NSFileProviderErrorKeys.NonExistentItemIdentifierKey, id);
-            var errorCode = NSFileProviderError.NoSuchItem;
+            NSFileProviderError errorCode = NSFileProviderError.NoSuchItem;
             return new NSError(errorCode.GetDomain(), (int)errorCode, userInfo);
         }
 

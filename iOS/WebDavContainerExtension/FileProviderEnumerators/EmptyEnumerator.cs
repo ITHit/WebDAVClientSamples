@@ -1,5 +1,4 @@
-﻿using System;
-using FileProvider;
+﻿using FileProvider;
 using Foundation;
 
 namespace WebDavContainerExtension.FileProviderEnumerators

@@ -17,7 +17,11 @@ namespace WebDavContainerExtension.Metadatas
 
         private string[] GetChangeSetOrEmpty(uint anchor)
         {
-            if(!changeSets.ContainsKey(anchor)) return new string[] { };
+            if(!changeSets.ContainsKey(anchor))
+            {
+                return new string[] { };
+            }
+
             return changeSets[anchor];
         }
 
@@ -39,7 +43,7 @@ namespace WebDavContainerExtension.Metadatas
 
         public MetadataDiff GetDiff(uint anchor, ItemMetadata[] metadatas)
         {
-            var changeSetContent = GetChangeSetOrEmpty(anchor);
+            string[] changeSetContent = GetChangeSetOrEmpty(anchor);
             var removed = changeSetContent.Where(item => !metadatas.Any(ch => ch.Identifier == item)).ToArray();
             return new MetadataDiff(removed, metadatas);
         }

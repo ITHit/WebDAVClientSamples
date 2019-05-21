@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-
-namespace WebDavContainerExtension.Metadatas
+﻿namespace WebDavContainerExtension.Metadatas
 {
     public class MetadataDiff
     {

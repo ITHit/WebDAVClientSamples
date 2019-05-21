@@ -118,7 +118,7 @@
     <DefineConstants>
     </DefineConstants>
     <WarningLevel>4</WarningLevel>
-    <CodesignKey>iPhone Developer: Igor Smok (L6YLB75XGQ)</CodesignKey>
+    <CodesignKey></CodesignKey>
     <MtouchNoSymbolStrip>true</MtouchNoSymbolStrip>
     <MtouchVerbosity>
     </MtouchVerbosity>
@@ -138,15 +138,13 @@
     <AppExtensionDebugBundleId />
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="ITHit.WebDAV.Client, Version=3.0.1032.0, Culture=neutral, PublicKeyToken=2ed2d3f88a9114ce, processorArchitecture=MSIL">
-      <HintPath>..\packages\ITHitWebDAVClient.3.0.1032-beta\lib\Xamarin.iOS10\ITHit.WebDAV.Client.dll</HintPath>
+    <Reference Include="ITHit.WebDAV.Client, Version=3.0.1034.0, Culture=neutral, PublicKeyToken=2ed2d3f88a9114ce, processorArchitecture=MSIL">
+      <HintPath>..\packages\ITHitWebDAVClient.3.0.1034\lib\Xamarin.iOS10\ITHit.WebDAV.Client.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
-    <Reference Include="System.Runtime.Serialization" />
     <Reference Include="System.Xml" />
     <Reference Include="Xamarin.iOS" />
-    <Reference Include="System.Net.Http" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Resources\" />
