@@ -49,7 +49,7 @@ namespace WebDavContainerExtension.Helpers
             return GetCocoaErrorWithMessage(NSCocoaError.None, "Network error happened.");
         }
 
-        public static NSError GetUnspecifiedErrorError()
+        public static NSError GetUnspecifiedError()
         {
             return GetCocoaErrorWithMessage(NSCocoaError.None, "Something went wrong");
         }

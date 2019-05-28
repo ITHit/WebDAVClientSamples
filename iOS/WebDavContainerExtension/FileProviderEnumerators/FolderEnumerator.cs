@@ -59,7 +59,7 @@ namespace WebDavContainerExtension.FileProviderEnumerators
             }
             catch (Exception)
             {
-                observer.FinishEnumerating(NsErrorHelper.GetUnspecifiedErrorError());
+                observer.FinishEnumerating(NsErrorHelper.GetUnspecifiedError());
             }
         }
 
@@ -96,7 +96,7 @@ namespace WebDavContainerExtension.FileProviderEnumerators
             }
             catch (Exception)
             {
-                observer.FinishEnumerating(NsErrorHelper.GetUnspecifiedErrorError());
+                observer.FinishEnumerating(NsErrorHelper.GetUnspecifiedError());
             }
         }
 

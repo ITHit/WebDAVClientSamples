@@ -3,7 +3,7 @@
 <plist version="1.0">
 <dict>
 	<key>CFBundleDisplayName</key>
-	<string>IT Hit WebDAV Client</string>
+	<string>WebDAV</string>
 	<key>CFBundleExecutable</key>
 	<string>WebDavContainer</string>
 	<key>CFBundleIdentifier</key>
@@ -11,7 +11,7 @@
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
 	<key>CFBundleName</key>
-	<string>WebDAVClient</string>
+	<string>IT Hit WebDAV Client</string>
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
 	<key>CFBundleShortVersionString</key>
@@ -44,12 +44,13 @@
 	<key>UIFileSharingEnabled</key>
 	<true/>
 	<key>XSAppIconAssets</key>
-	<string>Assets.xcassets/AppIcon.appiconset</string>
+	<string>Assets.xcassets/AppIcons.appiconset</string>
 	<key>CFBundleVersion</key>
 	<string>1034</string>
 	<key>UIDeviceFamily</key>
 	<array>
 		<integer>1</integer>
+		<integer>2</integer>
 	</array>
 </dict>
 </plist>

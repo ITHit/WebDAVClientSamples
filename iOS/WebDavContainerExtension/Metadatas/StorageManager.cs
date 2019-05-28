@@ -102,6 +102,45 @@ namespace WebDavContainerExtension.Metadatas
             }
         }
 
+
+        /// <summary>
+        /// Moves item on local filesystem and server if it exists.
+        /// </summary>
+        /// <param name="item">The item to move.</param>
+        /// <param name="destinationFolder"> The destination folder.</param>
+        /// <param name="name">New item's name.</param>
+        /// <exception cref="ArgumentNullException">
+        /// Throw when <paramref name="item"/> is null or <paramref name="destinationFolder"/> is null or if <paramref name="name"/> is null or empty.
+        /// </exception>
+        public void MoveItem(ItemMetadata item, FolderMetadata destinationFolder, string name)
+        {
+            if (item == null)
+            {
+                throw new ArgumentNullException(nameof(item));
+            }
+
+            if (destinationFolder == null)
+            {
+                throw new ArgumentNullException(nameof(destinationFolder));
+            }
+
+            if (name == null)
+            {
+                throw new ArgumentNullException(nameof(name));
+            }
+
+            if (item.ExistsOnServer)
+            {
+                this.MoveItemOnServer(item, destinationFolder, name);
+            }
+
+            if (item.ExistsLocal)
+            {
+                this.LocalStorage.Move(item.LocalItem, destinationFolder.LocalFolder, name);
+            }
+        }
+
+
         private FileMetadata CreateFileMetadata(string itemIdentifier, LocalFile localItem, IFileAsync serverItem = null)
         {
             string parentIdentifier = LocationMapper.GetParentIdentifier(itemIdentifier);
@@ -274,7 +313,6 @@ namespace WebDavContainerExtension.Metadatas
             FolderMetadata parent = GetFolderMetadata(item.ParentIdentifier);
             return CreateFolderOnServer(parent, item.Name);
         }
-
 
         public void MoveItemOnServer(ItemMetadata item, FolderMetadata destinationFolder, string name)
         {

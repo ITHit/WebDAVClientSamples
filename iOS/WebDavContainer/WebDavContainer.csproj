@@ -136,48 +136,49 @@
     <Reference Include="Xamarin.iOS" />
   </ItemGroup>
   <ItemGroup>
-    <ImageAsset Include="Assets.xcassets\AppIcon.appiconset\Contents.json">
+    <ImageAsset Include="Assets.xcassets\AppIcons.appiconset\Contents.json">
+      <Visible>false</Visible>
+    </ImageAsset>
+    <ImageAsset Include="Assets.xcassets\AppIcons.appiconset\wheel_1024x1024.png">
+      <Visible>false</Visible>
+    </ImageAsset>
+    <ImageAsset Include="Assets.xcassets\AppIcons.appiconset\wheel_120x120.png">
+      <Visible>false</Visible>
+    </ImageAsset>
+    <ImageAsset Include="Assets.xcassets\AppIcons.appiconset\wheel_152x152.png">
+      <Visible>false</Visible>
+    </ImageAsset>
+    <ImageAsset Include="Assets.xcassets\AppIcons.appiconset\wheel_167x167.png">
+      <Visible>false</Visible>
+    </ImageAsset>
+    <ImageAsset Include="Assets.xcassets\AppIcons.appiconset\wheel_180x180.png">
+      <Visible>false</Visible>
+    </ImageAsset>
+    <ImageAsset Include="Assets.xcassets\AppIcons.appiconset\wheel_20x20.png">
+      <Visible>false</Visible>
+    </ImageAsset>
+    <ImageAsset Include="Assets.xcassets\AppIcons.appiconset\wheel_29x29.png">
+      <Visible>false</Visible>
+    </ImageAsset>
+    <ImageAsset Include="Assets.xcassets\AppIcons.appiconset\wheel_40x40.png">
+      <Visible>false</Visible>
+    </ImageAsset>
+    <ImageAsset Include="Assets.xcassets\AppIcons.appiconset\wheel_58x58.png">
+      <Visible>false</Visible>
+    </ImageAsset>
+    <ImageAsset Include="Assets.xcassets\AppIcons.appiconset\wheel_60x60.png">
+      <Visible>false</Visible>
+    </ImageAsset>
+    <ImageAsset Include="Assets.xcassets\AppIcons.appiconset\wheel_76x76.png">
+      <Visible>false</Visible>
+    </ImageAsset>
+    <ImageAsset Include="Assets.xcassets\AppIcons.appiconset\wheel_80x80.png">
+      <Visible>false</Visible>
+    </ImageAsset>
+    <ImageAsset Include="Assets.xcassets\AppIcons.appiconset\wheel_87x87.png">
       <Visible>false</Visible>
     </ImageAsset>
     <ImageAsset Include="Assets.xcassets\Contents.json">
-      <Visible>false</Visible>
-    </ImageAsset>
-    <ImageAsset Include="Assets.xcassets\AppIcon.appiconset\wheel_40x40.png">
-      <Visible>false</Visible>
-    </ImageAsset>
-    <ImageAsset Include="Assets.xcassets\AppIcon.appiconset\wheel_60x60.png">
-      <Visible>false</Visible>
-    </ImageAsset>
-    <ImageAsset Include="Assets.xcassets\AppIcon.appiconset\wheel_58x58.png">
-      <Visible>false</Visible>
-    </ImageAsset>
-    <ImageAsset Include="Assets.xcassets\AppIcon.appiconset\wheel_87x87.png">
-      <Visible>false</Visible>
-    </ImageAsset>
-    <ImageAsset Include="Assets.xcassets\AppIcon.appiconset\wheel_80x80.png">
-      <Visible>false</Visible>
-    </ImageAsset>
-    <ImageAsset Include="Assets.xcassets\AppIcon.appiconset\wheel_120x120.png">
-      <Visible>false</Visible>
-    </ImageAsset>
-    <ImageAsset Include="Assets.xcassets\AppIcon.appiconset\wheel_180x180.png">
-      <Visible>false</Visible>
-    </ImageAsset>
-    <ImageAsset Include="Assets.xcassets\AppIcon.appiconset\wheel_29x29.png">
-      <Visible>false</Visible>
-    </ImageAsset>
-    <ImageAsset Include="Assets.xcassets\AppIcon.appiconset\wheel_76x76.png">
-      <Visible>false</Visible>
-    </ImageAsset>
-    <ImageAsset Include="Assets.xcassets\AppIcon.appiconset\wheel_152x152.png">
-      <Visible>false</Visible>
-    </ImageAsset>
-    <ImageAsset Include="Assets.xcassets\AppIcon.appiconset\wheel_1024x1024.png">
-      <Visible>false</Visible>
-    </ImageAsset>
-  </ItemGroup>
-  <ItemGroup>
-    <ImageAsset Include="Assets.xcassets\AppIcon.appiconset\wheel_1024x1024.png">
       <Visible>false</Visible>
     </ImageAsset>
   </ItemGroup>
@@ -186,9 +187,6 @@
     <InterfaceDefinition Include="Main.storyboard" />
   </ItemGroup>
   <ItemGroup>
-    <ImageAsset Include="Assets.xcassets\AppIcon.appiconset\Contents.json">
-      <Visible>false</Visible>
-    </ImageAsset>
     <ImageAsset Include="Assets.xcassets\Contents.json">
       <Visible>false</Visible>
     </ImageAsset>
@@ -218,56 +216,6 @@
   </ItemGroup>
   <ItemGroup>
     <BundleResource Include="Resources\wheel.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <ImageAsset Include="Assets.xcassets\AppIcon.appiconset\wheel_120x120.png">
-      <Visible>false</Visible>
-    </ImageAsset>
-  </ItemGroup>
-  <ItemGroup>
-    <ImageAsset Include="Assets.xcassets\AppIcon.appiconset\wheel_152x152.png">
-      <Visible>false</Visible>
-    </ImageAsset>
-  </ItemGroup>
-  <ItemGroup>
-    <ImageAsset Include="Assets.xcassets\AppIcon.appiconset\wheel_180x180.png">
-      <Visible>false</Visible>
-    </ImageAsset>
-  </ItemGroup>
-  <ItemGroup>
-    <ImageAsset Include="Assets.xcassets\AppIcon.appiconset\wheel_29x29.png">
-      <Visible>false</Visible>
-    </ImageAsset>
-  </ItemGroup>
-  <ItemGroup>
-    <ImageAsset Include="Assets.xcassets\AppIcon.appiconset\wheel_40x40.png">
-      <Visible>false</Visible>
-    </ImageAsset>
-  </ItemGroup>
-  <ItemGroup>
-    <ImageAsset Include="Assets.xcassets\AppIcon.appiconset\wheel_58x58.png">
-      <Visible>false</Visible>
-    </ImageAsset>
-  </ItemGroup>
-  <ItemGroup>
-    <ImageAsset Include="Assets.xcassets\AppIcon.appiconset\wheel_60x60.png">
-      <Visible>false</Visible>
-    </ImageAsset>
-  </ItemGroup>
-  <ItemGroup>
-    <ImageAsset Include="Assets.xcassets\AppIcon.appiconset\wheel_76x76.png">
-      <Visible>false</Visible>
-    </ImageAsset>
-  </ItemGroup>
-  <ItemGroup>
-    <ImageAsset Include="Assets.xcassets\AppIcon.appiconset\wheel_80x80.png">
-      <Visible>false</Visible>
-    </ImageAsset>
-  </ItemGroup>
-  <ItemGroup>
-    <ImageAsset Include="Assets.xcassets\AppIcon.appiconset\wheel_87x87.png">
-      <Visible>false</Visible>
-    </ImageAsset>
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath)\Xamarin\iOS\Xamarin.iOS.CSharp.targets" />
 </Project>

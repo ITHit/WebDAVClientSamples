@@ -219,7 +219,7 @@ namespace WebDavContainerExtension
                 case WebDavHttpException _:
                     return NsErrorHelper.GetUnspecifiedServerError();
                 default:
-                    return NsErrorHelper.GetUnspecifiedErrorError();
+                    return NsErrorHelper.GetUnspecifiedError();
             }
         }
 
@@ -239,10 +239,11 @@ namespace WebDavContainerExtension
             {
                 string identifier = this.GetPersistentIdentifier(url);
                 FileMetadata item = this.StorageManager.GetFileMetadata(identifier);
-                if(item.HasUploadError)
+                if(item.HasUploadError || !item.ExistsOnServer)
                 {
                     this.ItemChangedAtUrl(url);
                     item = this.StorageManager.GetFileMetadata(identifier);
+                    this.StorageManager.NotifyEnumerator(this.LocationMapper.GetParentIdentifier(identifier));
                 }
 
                 if (!item.ExistsOnServer || item.IsSyncByEtag || item.HasUploadError)
@@ -298,12 +299,13 @@ namespace WebDavContainerExtension
         {
             try
             {
-                FolderMetadata folderMetadata = this.StorageManager.GetFolderMetadata(parentItemIdentifier);
-                if(folderMetadata.ServerItem != null)
-                {
-                    completionHandler?.Invoke(ProviderItem.CreateFromMetadata(folderMetadata), null);
+                FolderMetadata parentFolder = this.StorageManager.GetFolderMetadata(parentItemIdentifier);
+                if(!parentFolder.ExistsOnServer) {
+                    completionHandler?.Invoke(null, NsErrorHelper.GetUnspecifiedError());
+                    return;
                 }
-                FolderMetadata createdFolder = this.StorageManager.CreateFolderOnServer(folderMetadata, directoryName);
+
+                FolderMetadata createdFolder = this.StorageManager.CreateFolderOnServer(parentFolder, directoryName);
                 completionHandler?.Invoke(ProviderItem.CreateFromMetadata(createdFolder), null);
                 this.StorageManager.NotifyEnumerator(parentItemIdentifier);
             }
@@ -441,7 +443,9 @@ namespace WebDavContainerExtension
                 ItemMetadata item = this.StorageManager.GetItemMetadata(itemIdentifier);
                 FolderMetadata destinationFolder = this.StorageManager.GetFolderMetadata(destParentItemIdentifier);
                 string name = newName ?? item.Name;
-                this.StorageManager.MoveItemOnServer(item, destinationFolder, name);
+                this.StorageManager.MoveItem(item, destinationFolder, name);
+
+                // Only item's name and parent identifier should be changed.
                 string oldParentIdentifier = item.ParentIdentifier;
                 item.ParentIdentifier = destParentItemIdentifier;
                 item.Name = name;

@@ -39,7 +39,7 @@ namespace WebDavContainerExtension.FileProviderItems
             }
 
             IsDownloaded = fileMetadata.ExistsLocal;
-            IsMostRecentVersionDownloaded = fileMetadata.IsSyncByEtag && fileMetadata.ExistsLocal;
+            IsMostRecentVersionDownloaded = (fileMetadata.IsSyncByEtag && fileMetadata.ExistsLocal) || !fileMetadata.ExistsOnServer;
             IsUploaded = !fileMetadata.HasUploadError && (fileMetadata.IsSyncByEtag || !fileMetadata.ExistsLocal);
             UploadingError = fileMetadata.LocalFile.UploadError;
         }

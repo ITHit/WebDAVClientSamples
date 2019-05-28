@@ -2,10 +2,12 @@
 using System.IO;
 using System.Linq;
 using System.Runtime.Serialization;
-using WebDavContainerExtension.Extensions;
-using Foundation;
-using WebDavContainerExtension.Helpers;
 using System.Runtime.Serialization.Formatters.Binary;
+
+using Foundation;
+
+using WebDavContainerExtension.Extensions;
+using WebDavContainerExtension.Helpers;
 
 namespace WebDavContainerExtension.Storages
 {
@@ -137,6 +139,57 @@ namespace WebDavContainerExtension.Storages
         {
             bool isExists = NSFileManager.DefaultManager.FileExists(localPath);
             return new LocalFolder(localPath, isExists);
+        }
+
+        /// <summary>
+        /// Moves item in local storage. Creates <paramref name="destinationFolder"/> if not exists.
+        /// </summary>
+        /// <param name="item"> The item to move. </param>
+        /// <param name="destinationFolder"> The destination folder. </param>
+        /// <param name="name"> New item name. </param>
+        /// <exception cref="ArgumentNullException">
+        /// Throw when <paramref name="item"/> is null or <paramref name="destinationFolder"/> is null or if <paramref name="name"/> is null or empty.
+        /// </exception>
+        /// <exception cref="PathTooLongException">
+        /// The specified path, file name, or both exceed the system-defined maximum length.
+        /// </exception>
+        /// <exception cref="UnauthorizedAccessException">
+        /// The caller does not have the required permission.
+        /// </exception>
+        /// <exception cref="IOException">
+        /// The destination item already exists or <paramref name="item"/> not found or destination item already exists.
+        /// </exception>
+        public void Move(LocalItem item, LocalFolder destinationFolder, string name)
+        {
+            if (item == null)
+            {
+                throw new ArgumentNullException(nameof(item));
+            }
+
+            if (destinationFolder == null)
+            {
+                throw new ArgumentNullException(nameof(destinationFolder));
+            }
+
+            if (name == null)
+            {
+                throw new ArgumentNullException(nameof(name));
+            }
+
+            if (!destinationFolder.IsExists)
+            {
+                Directory.CreateDirectory(destinationFolder.Path);
+            }
+
+            string newPath = Path.Combine(destinationFolder.Path, name);
+            if (item.IsFile)
+            {
+                File.Move(item.Path, newPath);
+            }
+            else
+            {
+                Directory.Move(item.Path, newPath);
+            }
         }
     }
 }
