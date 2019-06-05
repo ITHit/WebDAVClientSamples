@@ -3,11 +3,16 @@ using System.IO;
 using System.Runtime.InteropServices;
 using System.Text;
 
-namespace WebDavContainerExtension.Helpers
+namespace WebDavCommon.Helpers
 {
+    /// <summary>
+    /// Provides extension methods to read and write extended attributes on file and folders.
+    /// </summary>
+    /// <remarks>This class uses file system to store extended attributes in case of alternative data streams not supported.</remarks>
     public class NSFileManagerHelper
     {
-        private const string LibsystemKernelDylib = "/usr/lib/system/libsystem_kernel.dylib";
+        /// <summary>The path to system lib.</summary>
+        private const string LibSystemKernelDylib = "/usr/lib/system/libsystem_kernel.dylib";
 
         /// <summary>
         /// Errno for not existing attribute.
@@ -19,12 +24,6 @@ namespace WebDavContainerExtension.Helpers
         /// </summary>
         private const int ErrorMessageBufferMaxSize = 255;
 
-
-        static NSFileManagerHelper()
-        {
-        }
-
-
         /// <summary>
         /// Determines whether extended attributes are supported.
         /// </summary>
@@ -33,12 +32,9 @@ namespace WebDavContainerExtension.Helpers
         /// <exception cref="ArgumentNullException">Throw when path is null or empty.</exception>
         public static bool IsExtendedAttributesSupported(string path)
         {
-            if (string.IsNullOrEmpty(path))
-            {
-                throw new ArgumentNullException(nameof(path));
-            }
+            if (string.IsNullOrEmpty(path)) throw new ArgumentNullException(nameof(path));
 
-            long attributeCount = ListXAattr(path, null, 0, 0);
+            long attributeCount = ListXAttr(path, null, 0, 0);
             return attributeCount >= 0;
         }
 
@@ -52,25 +48,14 @@ namespace WebDavContainerExtension.Helpers
         /// <exception cref="IOException">Throw when file or attribute is no available.</exception>
         public static string GetExtendedAttribute(string path, string attrName)
         {
-            if (string.IsNullOrEmpty(path))
-            {
-                throw new ArgumentNullException(nameof(path));
-            }
-
-            if (string.IsNullOrEmpty(attrName))
-            {
-                throw new ArgumentNullException(nameof(attrName));
-            }
+            if (string.IsNullOrEmpty(path)) throw new ArgumentNullException(nameof(path));
+            if (string.IsNullOrEmpty(attrName)) throw new ArgumentNullException(nameof(attrName));
 
             byte[] buffer = GetExtendedAttributeBytes(path, attrName);
-            if (buffer != null)
-            {
-                return Encoding.UTF8.GetString(buffer);
-            }
+            if (buffer != null) return Encoding.UTF8.GetString(buffer);
 
             return null;
         }
-
 
         /// <summary>
         /// Reads extended attribute as <see cref="T:byte[]" />.
@@ -82,34 +67,21 @@ namespace WebDavContainerExtension.Helpers
         /// <exception cref="IOException">Throw when file or attribute is no available.</exception>
         public static byte[] GetExtendedAttributeBytes(string path, string attrName)
         {
-            if (string.IsNullOrEmpty(path))
-            {
-                throw new ArgumentNullException(nameof(path));
-            }
-
-            if (string.IsNullOrEmpty(attrName))
-            {
-                throw new ArgumentNullException(nameof(attrName));
-            }
+            if (string.IsNullOrEmpty(path)) throw new ArgumentNullException(nameof(path));
+            if (string.IsNullOrEmpty(attrName)) throw new ArgumentNullException(nameof(attrName));
 
             long attributeSize = GetXAttr(path, attrName, null, 0, 0, 0);
             if (attributeSize == -1)
             {
-                if (Marshal.GetLastWin32Error() == AttributeNotFoundErrno)
-                {
-                    return null;
-                }
+                if (Marshal.GetLastWin32Error() == AttributeNotFoundErrno) return null;
 
                 ThrowLastException(path, attrName);
             }
 
-            byte[] buffer = new byte[attributeSize];
+            var buffer = new byte[attributeSize];
             long readLength = GetXAttr(path, attrName, buffer, attributeSize, 0, 0);
 
-            if (readLength == -1)
-            {
-                ThrowLastException(path, attrName);
-            }
+            if (readLength == -1) ThrowLastException(path, attrName);
 
             return buffer;
         }
@@ -124,20 +96,12 @@ namespace WebDavContainerExtension.Helpers
         /// <exception cref="IOException">Throw when file or attribute is no available.</exception>
         public static void SetExtendedAttribute(string path, string attrName, string attrValue)
         {
-            if (string.IsNullOrEmpty(path))
-            {
-                throw new ArgumentNullException(nameof(path));
-            }
-
-            if (string.IsNullOrEmpty(attrName))
-            {
-                throw new ArgumentNullException(nameof(attrName));
-            }
+            if (string.IsNullOrEmpty(path)) throw new ArgumentNullException(nameof(path));
+            if (string.IsNullOrEmpty(attrName)) throw new ArgumentNullException(nameof(attrName));
 
             byte[] buffer = Encoding.UTF8.GetBytes(attrValue);
             SetExtendedAttributeBytes(path, attrName, buffer);
         }
-
 
         /// <summary>
         /// Writes extended attribute as <see cref="T:byte[]" />.
@@ -149,21 +113,11 @@ namespace WebDavContainerExtension.Helpers
         /// <exception cref="IOException">Throw when file or attribute is no available.</exception>
         public static void SetExtendedAttributeBytes(string path, string attrName, byte[] buffer)
         {
-            if (string.IsNullOrEmpty(path))
-            {
-                throw new ArgumentNullException(nameof(path));
-            }
-
-            if (string.IsNullOrEmpty(attrName))
-            {
-                throw new ArgumentNullException(nameof(attrName));
-            }
+            if (string.IsNullOrEmpty(path)) throw new ArgumentNullException(nameof(path));
+            if (string.IsNullOrEmpty(attrName)) throw new ArgumentNullException(nameof(attrName));
 
             long result = SetXAttr(path, attrName, buffer, buffer.Length, 0, 0);
-            if (result == -1)
-            {
-                ThrowLastException(path, attrName);
-            }
+            if (result == -1) ThrowLastException(path, attrName);
         }
 
         /// <summary>
@@ -173,21 +127,11 @@ namespace WebDavContainerExtension.Helpers
         /// <param name="attrName">Attribute name.</param>
         public static void DeleteExtendedAttribute(string path, string attrName)
         {
-            if (string.IsNullOrEmpty(path))
-            {
-                throw new ArgumentNullException(nameof(path));
-            }
-
-            if (string.IsNullOrEmpty(attrName))
-            {
-                throw new ArgumentNullException(nameof(attrName));
-            }
+            if (string.IsNullOrEmpty(path)) throw new ArgumentNullException(nameof(path));
+            if (string.IsNullOrEmpty(attrName)) throw new ArgumentNullException(nameof(attrName));
 
             long result = RemoveXAttr(path, attrName, 0);
-            if (result == -1)
-            {
-                ThrowLastException(path, attrName);
-            }
+            if (result == -1) ThrowLastException(path, attrName);
         }
 
         /// <summary>
@@ -195,7 +139,7 @@ namespace WebDavContainerExtension.Helpers
         /// </summary>
         /// <param name="fileName">File name.</param>
         /// <param name="attrName">Attribute name.</param>
-        /// <exception cref="System.IO.IOException"></exception>
+        /// <exception cref="System.IO.IOException"> if IO error occured.</exception>
         private static void ThrowLastException(string fileName, string attrName)
         {
             int errno = Marshal.GetLastWin32Error(); // It returns glibc errno
@@ -225,8 +169,14 @@ namespace WebDavContainerExtension.Helpers
         /// <param name="position">Position value.</param>
         /// <param name="options">Options value.</param>
         /// <returns>Attribute value size in bytes, when returning value -1 than some error occurred./// </returns>
-        [DllImport(LibsystemKernelDylib, EntryPoint = "getxattr", SetLastError = true)]
-        private static extern long GetXAttr(string filePath, string attrName, byte[] buffer, long bufferSize, long position, int options);
+        [DllImport(LibSystemKernelDylib, EntryPoint = "getxattr", SetLastError = true)]
+        private static extern long GetXAttr(
+            string filePath,
+            string attrName,
+            byte[] buffer,
+            long bufferSize,
+            long position,
+            int options);
 
         /// <summary>
         /// External func setxattr from libc, sets attribute value for file by name. 
@@ -238,8 +188,14 @@ namespace WebDavContainerExtension.Helpers
         /// <param name="position">Position value.</param>
         /// <param name="options">Options value.</param>
         /// <returns>Status, when returning value -1 than some error occurred.</returns>
-        [DllImport(LibsystemKernelDylib, EntryPoint = "setxattr", SetLastError = true)]
-        private static extern long SetXAttr(string filePath, string attrName, byte[] attrValue, long size, long position, int options);
+        [DllImport(LibSystemKernelDylib, EntryPoint = "setxattr", SetLastError = true)]
+        private static extern long SetXAttr(
+            string filePath,
+            string attrName,
+            byte[] attrValue,
+            long size,
+            long position,
+            int options);
 
         /// <summary>
         /// Removes the extended attribute. 
@@ -248,7 +204,7 @@ namespace WebDavContainerExtension.Helpers
         /// <param name="attrName">Attribute name.</param>
         /// <param name="options">Options value.</param>
         /// <returns>On success, zero is returned. On failure, -1 is returned.</returns>
-        [DllImport(LibsystemKernelDylib, EntryPoint = "removexattr", SetLastError = true)]
+        [DllImport(LibSystemKernelDylib, EntryPoint = "removexattr", SetLastError = true)]
         private static extern long RemoveXAttr(string path, string attrName, int options);
 
         /// <summary>
@@ -259,16 +215,15 @@ namespace WebDavContainerExtension.Helpers
         /// <param name="size">Buffer size</param>
         /// <param name="options">Options value.</param>
         /// <returns>Attributes bytes array size, when returning value -1 than some error occurred</returns>
-        [DllImport(LibsystemKernelDylib, EntryPoint = "listxattr", SetLastError = true)]
-        private static extern long ListXAattr(string filePath, StringBuilder nameBuffer, long size, int options);
+        [DllImport(LibSystemKernelDylib, EntryPoint = "listxattr", SetLastError = true)]
+        private static extern long ListXAttr(string filePath, StringBuilder nameBuffer, long size, int options);
 
-        /// <summary>
-        /// External func strerror_r from libc, what returns string that describes the error code passed in the argument.
-        /// </summary>
+        /// <summary>External func strerror_r from libc, what returns string that describes the error code passed in the argument.</summary>
         /// <param name="code">Error number.</param>
         /// <param name="buffer">Destination buffer.</param>
         /// <param name="bufferSize">Buffer size.</param>
-        [DllImport(LibsystemKernelDylib, EntryPoint = "strerror_r", SetLastError = true)]
+        /// <returns>The <see cref="IntPtr"/>.</returns>
+        [DllImport(LibSystemKernelDylib, EntryPoint = "strerror_r", SetLastError = true)]
         private static extern IntPtr StrErrorR(int code, StringBuilder buffer, int bufferSize);
     }
 }

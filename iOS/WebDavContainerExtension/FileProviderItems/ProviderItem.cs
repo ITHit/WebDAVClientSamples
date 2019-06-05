@@ -1,7 +1,8 @@
 ﻿using System.Linq;
 using FileProvider;
 using Foundation;
-using WebDavContainerExtension.Metadatas;
+
+using WebDavCommon.Metadatas;
 
 namespace WebDavContainerExtension.FileProviderItems
 {
@@ -32,12 +33,12 @@ namespace WebDavContainerExtension.FileProviderItems
 
         public static INSFileProviderItem CreateFromMetadata(ItemMetadata itemMetadata)
         {
-            if(itemMetadata.IsFile)
+            if(itemMetadata is FileMetadata)
             {
-                return new FileItem(itemMetadata.AsFile());
+                return new FileItem(itemMetadata as FileMetadata);
             }
 
-            return new FolderItem(itemMetadata.AsFolder());
+            return new FolderItem(itemMetadata as FolderMetadata);
         }
     }
 }

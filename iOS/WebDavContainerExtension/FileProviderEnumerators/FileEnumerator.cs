@@ -2,9 +2,11 @@
 using FileProvider;
 using Foundation;
 using ITHit.WebDAV.Client.Exceptions;
+
+using WebDavCommon.Helpers;
+using WebDavCommon.Metadatas;
+
 using WebDavContainerExtension.FileProviderItems;
-using WebDavContainerExtension.Helpers;
-using WebDavContainerExtension.Metadatas;
 
 namespace WebDavContainerExtension.FileProviderEnumerators
 {
@@ -36,7 +38,7 @@ namespace WebDavContainerExtension.FileProviderEnumerators
                 var metadata = storageManager.GetFileMetadata(this.EnumeratedItemIdentifier);
                 if(!metadata.IsExists)
                 {
-                    observer.FinishEnumerating(NsErrorHelper.GetFileProviderNotFoundError(EnumeratedItemIdentifier));
+                    observer.FinishEnumerating(NSFileProviderErrorFactory.CreateNonExistentItemError(EnumeratedItemIdentifier));
                     return;
                 }
 
@@ -46,15 +48,15 @@ namespace WebDavContainerExtension.FileProviderEnumerators
             }
             catch(UnauthorizedException)
             {
-                observer.FinishEnumerating(NsErrorHelper.GetFileProviderNotFoundError(this.EnumeratedItemIdentifier));
+                observer.FinishEnumerating(NSFileProviderErrorFactory.CreateNonExistentItemError(this.EnumeratedItemIdentifier));
             }
             catch(WebDavHttpException)
             {
-                observer.FinishEnumerating(NsErrorHelper.GetUnspecifiedServerError());
+                observer.FinishEnumerating(NSErrorFactory.CreateUnspecifiedNetworkError());
             }
             catch(Exception)
             {
-                observer.FinishEnumerating(NsErrorHelper.GetUnspecifiedError());
+                observer.FinishEnumerating(NSErrorFactory.CreateUnspecifiedError());
             }
         }
 
@@ -76,15 +78,15 @@ namespace WebDavContainerExtension.FileProviderEnumerators
             }
             catch(UnauthorizedException)
             {
-                observer.FinishEnumerating(NsErrorHelper.GetFileProviderUnauthorizedError());
+                observer.FinishEnumerating(NSFileProviderErrorFactory.CreatesNotAuthenticatedError());
             }
             catch(WebDavHttpException)
             {
-                observer.FinishEnumerating(NsErrorHelper.GetUnspecifiedServerError());
+                observer.FinishEnumerating(NSErrorFactory.CreateUnspecifiedNetworkError());
             }
             catch(Exception)
             {
-                observer.FinishEnumerating(NsErrorHelper.GetUnspecifiedError());
+                observer.FinishEnumerating(NSErrorFactory.CreateUnspecifiedError());
             }
         }
 

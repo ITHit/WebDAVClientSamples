@@ -1,10 +1,11 @@
 // WARNING
 //
-// This file has been generated automatically by Visual Studio to store outlets and
-// actions made in the UI designer. If it is removed, they will be lost.
-// Manual changes to this file may not be handled correctly.
+// This file has been generated automatically by Visual Studio from the outlets and
+// actions declared in your storyboard file.
+// Manual changes to this file will not be maintained.
 //
 using Foundation;
+using System;
 using System.CodeDom.Compiler;
 
 namespace WebDavContainer
@@ -13,8 +14,15 @@ namespace WebDavContainer
     partial class ViewController
     {
         [Outlet]
+        UIKit.UILabel SuccessLabel { get; set; }
+
+        [Outlet]
         [GeneratedCode ("iOS Designer", "1.0")]
         UIKit.UIButton Login { get; set; }
+
+        [Outlet]
+        [GeneratedCode ("iOS Designer", "1.0")]
+        UIKit.UIActivityIndicatorView LoginActivityIndicator { get; set; }
 
         [Outlet]
         [GeneratedCode ("iOS Designer", "1.0")]
@@ -25,20 +33,22 @@ namespace WebDavContainer
         UIKit.UITextField Server { get; set; }
 
         [Outlet]
-        UIKit.UILabel SuccessLabel { get; set; }
-
-        [Outlet]
         [GeneratedCode ("iOS Designer", "1.0")]
         UIKit.UITextField Username { get; set; }
 
         [Action ("Login_Clicked:")]
         partial void Login_Clicked (UIKit.UIButton sender);
-        
+
         void ReleaseDesignerOutlets ()
         {
             if (Login != null) {
                 Login.Dispose ();
                 Login = null;
+            }
+
+            if (LoginActivityIndicator != null) {
+                LoginActivityIndicator.Dispose ();
+                LoginActivityIndicator = null;
             }
 
             if (Password != null) {

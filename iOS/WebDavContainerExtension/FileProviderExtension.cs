@@ -1,28 +1,30 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Net;
+
 using FileProvider;
 using Foundation;
 using ITHit.WebDAV.Client;
 using ITHit.WebDAV.Client.Exceptions;
-using ITHit.WebDAV.Client.Logger;
+
 using UIKit;
 using WebDavCommon;
-using WebDavContainerExtension.Extensions;
+using WebDavCommon.Extensions;
+using WebDavCommon.Helpers;
+using WebDavCommon.Metadatas;
+using WebDavCommon.Storages;
+
 using WebDavContainerExtension.FileProviderEnumerators;
 using WebDavContainerExtension.FileProviderItems;
-using WebDavContainerExtension.Helpers;
-using WebDavContainerExtension.Metadatas;
-using WebDavContainerExtension.Storages;
 
 namespace WebDavContainerExtension
 {
+    /// <inheritdoc />
     [Register(nameof(FileProviderExtension))]
-    class FileProviderExtension : NSFileProviderExtension
+    public class FileProviderExtension : NSFileProviderExtension
     {
-        private const string StorageFolder = "Documents";
+        private LocalStorage LocalStorage;
 
         public LocationMapper LocationMapper { get; }
 
@@ -32,42 +34,11 @@ namespace WebDavContainerExtension
 
         public FileProviderExtension()
         {
-            var serverSettings = AppGroupSettings.GetServerSettings();
-            Session = InitSession(serverSettings);
-            string documentStoragePath = InitLocalStorage();
-            LocationMapper = new LocationMapper(serverSettings.ServerUri, documentStoragePath);
-            this.StorageManager = new StorageManager(LocationMapper, Session, new LocalStorage());
-        }
-
-        private WebDavSessionAsync InitSession(ServerSettings serverSettings)
-        {
-#if !DEBUG
-            FileLogger.Level = LogLevel.Off;
-#endif
-            string license = @"<?xml version='1.0'...";
-            var session = new WebDavSessionAsync(license);
-
-            if(serverSettings != null && serverSettings.HasCredential)
-            {
-                Session.Credentials = new NetworkCredential(serverSettings.UserName, serverSettings.Password);
-            }
-
-            return session;
-        }
-
-        private string InitLocalStorage()
-        {
-            using (NSUrl documentStorageUrl = NSFileProviderManager.DefaultManager.DocumentStorageUrl.Append(StorageFolder, true))
-            {
-                NSError error;
-                NSFileManager.DefaultManager.CreateDirectory(documentStorageUrl, true, null, out error);
-                if(error != null)
-                {
-                    throw error.AsException();
-                }
-
-                return documentStorageUrl.Path;
-            }
+            ServerSettings serverSettings = AppGroupSettings.GetServerSettings();
+            this.Session = SessionFactory.Create(serverSettings);
+            this.LocalStorage = new LocalStorage();
+            this.LocationMapper = new LocationMapper(serverSettings.ServerUri, this.LocalStorage.StorageRootPath);
+            this.StorageManager = new StorageManager(this.LocationMapper, this.Session, this.LocalStorage);
         }
 
         /// <param name="url">The shared document's URL.</param>
@@ -88,7 +59,7 @@ namespace WebDavContainerExtension
                 ItemMetadata itemMetadata = this.StorageManager.GetItemMetadata(identifier);
                 if (!itemMetadata.IsExists)
                 {
-                    completionHandler?.Invoke(NsErrorHelper.GetFileProviderNotFoundError(identifier));
+                    completionHandler?.Invoke(NSFileProviderErrorFactory.CreateNonExistentItemError(identifier));
                     return;
                 }
                 NSUrl placeholderUrl = NSFileProviderManager.GetPlaceholderUrl(url);
@@ -120,7 +91,7 @@ namespace WebDavContainerExtension
                 ItemMetadata itemMetadata = this.StorageManager.GetItemMetadata(identifier);
                 if (!itemMetadata.IsExists)
                 {
-                    error = NsErrorHelper.GetFileProviderNotFoundError(identifier);
+                    error = NSFileProviderErrorFactory.CreateNonExistentItemError(identifier);
                     return null;
                 }
 
@@ -192,7 +163,7 @@ namespace WebDavContainerExtension
                 FileMetadata item = this.StorageManager.GetFileMetadata(identifier);
                 if (!item.ExistsLocal)
                 {
-                    throw NsErrorHelper.GetFileProviderNotFoundError().AsException();
+                    throw NSFileProviderErrorFactory.CreateNonExistentItemError().AsException();
                 }
 
                 item = StorageManager.ResetLocalVersion(item);
@@ -213,13 +184,13 @@ namespace WebDavContainerExtension
                 case NSErrorException error:
                     return error.Error;
                 case NotFoundException _:
-                    return NsErrorHelper.GetFileProviderNotFoundError();
+                    return NSFileProviderErrorFactory.CreateNonExistentItemError();
                 case UnauthorizedException _:
-                    return NsErrorHelper.GetFileProviderUnauthorizedError();
+                    return NSFileProviderErrorFactory.CreatesNotAuthenticatedError();
                 case WebDavHttpException _:
-                    return NsErrorHelper.GetUnspecifiedServerError();
+                    return NSErrorFactory.CreateUnspecifiedNetworkError();
                 default:
-                    return NsErrorHelper.GetUnspecifiedError();
+                    return NSErrorFactory.CreateUnspecifiedError();
             }
         }
 
@@ -301,7 +272,7 @@ namespace WebDavContainerExtension
             {
                 FolderMetadata parentFolder = this.StorageManager.GetFolderMetadata(parentItemIdentifier);
                 if(!parentFolder.ExistsOnServer) {
-                    completionHandler?.Invoke(null, NsErrorHelper.GetUnspecifiedError());
+                    completionHandler?.Invoke(null, NSErrorFactory.CreateUnspecifiedError());
                     return;
                 }
 
@@ -311,7 +282,7 @@ namespace WebDavContainerExtension
             }
             catch (MethodNotAllowedException)
             {
-                completionHandler?.Invoke(null, NsErrorHelper.GetFileProviderDuplicateException());
+                completionHandler?.Invoke(null, NSFileProviderErrorFactory.CreateFilenameCollisionError());
             }
             catch (Exception ex)
             {
@@ -338,12 +309,12 @@ namespace WebDavContainerExtension
                     return;
                 }
 
-                this.StorageManager.DeleteEveryWhere(metadata);
+                this.StorageManager.Delete(metadata);
                 completionHandler?.Invoke(null);
             }
             catch (MethodNotAllowedException)
             {
-                completionHandler?.Invoke( NsErrorHelper.GetFileProviderDuplicateException());
+                completionHandler?.Invoke( NSFileProviderErrorFactory.CreateFilenameCollisionError());
             }
             catch (Exception ex)
             {
@@ -368,14 +339,14 @@ namespace WebDavContainerExtension
                 FolderMetadata parentMetadata = StorageManager.GetFolderMetadata(parentItemIdentifier);
                 if(!parentMetadata.IsExists)
                 {
-                    completionHandler?.Invoke(null, NsErrorHelper.GetFileProviderNotFoundError(parentItemIdentifier));
+                    completionHandler?.Invoke(null, NSFileProviderErrorFactory.CreateNonExistentItemError(parentItemIdentifier));
                     return;
                 }
 
                 IEnumerable<string> existsNames = StorageManager.GetFolderChildrenMetadatas(parentMetadata).Select(x => x.Name);
                 string fileName = GetNewFileName(fileUrl.LastPathComponent, existsNames);
                 FileMetadata createdFile = StorageManager.CreateFileOnServer(parentMetadata, fileName);
-                createdFile = StorageManager.WriteContentOnServer(createdFile, fileUrl.Path);
+                createdFile = StorageManager.WriteFileContentOnServer(createdFile, fileUrl.Path);
                 completionHandler?.Invoke(ProviderItem.CreateFromMetadata(createdFile), null);
                 this.StorageManager.NotifyEnumerator(parentItemIdentifier);
             }
@@ -454,11 +425,11 @@ namespace WebDavContainerExtension
             }
             catch (PreconditionFailedException)
             {
-                completionHandler?.Invoke(null, NsErrorHelper.GetFileProviderDuplicateException());
+                completionHandler?.Invoke(null, NSFileProviderErrorFactory.CreateFilenameCollisionError());
             }
             catch (ForbiddenException)
             {
-                completionHandler?.Invoke(null, NsErrorHelper.GetFileProviderDuplicateException());
+                completionHandler?.Invoke(null, NSFileProviderErrorFactory.CreateFilenameCollisionError());
             }
             catch (Exception ex)
             {

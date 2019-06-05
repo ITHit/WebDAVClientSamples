@@ -46,6 +46,9 @@
     </MtouchVerbosity>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="ITHit.WebDAV.Client, Version=3.1.1072.0, Culture=neutral, PublicKeyToken=2ed2d3f88a9114ce, processorArchitecture=MSIL">
+      <HintPath>..\packages\ITHitWebDAVClient.3.1.1072\lib\Xamarin.iOS10\ITHit.WebDAV.Client.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Xml" />
     <Reference Include="System.Core" />
@@ -55,9 +58,32 @@
     <Folder Include="Resources\" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Extensions\NSErrorExtension.cs" />
+    <Compile Include="Helpers\FileManagerHelper.cs" />
+    <Compile Include="Helpers\NsErrorFactory.cs" />
+    <Compile Include="Helpers\NsFileProviderErrorFactory.cs" />
+    <Compile Include="Helpers\URLHelper.cs" />
+    <Compile Include="Helpers\UTTypeHelper.cs" />
+    <Compile Include="LocationMapper.cs" />
+    <Compile Include="Metadatas\ChangeSet.cs" />
+    <Compile Include="Metadatas\FileMetadata.cs" />
+    <Compile Include="Metadatas\FolderMetadata.cs" />
+    <Compile Include="Metadatas\ItemMetadata.cs" />
+    <Compile Include="Metadatas\StorageManager.cs" />
+    <Compile Include="Metadatas\SynchronizationSimulator.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ServerSettings.cs" />
     <Compile Include="AppGroupSettings.cs" />
+    <Compile Include="SessionFactory.cs" />
+    <Compile Include="Storages\ExtendedAttribute.cs" />
+    <Compile Include="Storages\ExtendedAttributeStorage.cs" />
+    <Compile Include="Storages\LocalFile.cs" />
+    <Compile Include="Storages\LocalFolder.cs" />
+    <Compile Include="Storages\LocalItem.cs" />
+    <Compile Include="Storages\LocalStorage.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath)\Xamarin\iOS\Xamarin.iOS.CSharp.targets" />
 </Project>

@@ -1,5 +1,7 @@
-﻿using WebDavContainerExtension.Metadatas;
-using FileProvider;
+﻿using FileProvider;
+
+using WebDavCommon.Helpers;
+using WebDavCommon.Metadatas;
 
 namespace WebDavContainerExtension.FileProviderItems
 {
@@ -8,7 +10,7 @@ namespace WebDavContainerExtension.FileProviderItems
 
         public FolderItem(FolderMetadata createdFolder) : base(createdFolder)
         {
-            TypeIdentifier = Extension.GetFolderTypeIdentifier();
+            TypeIdentifier = UTTypeHelper.GetFolderTypeIdentifier();
             this.Capabilities = NSFileProviderItemCapabilities.AddingSubItems
                                | NSFileProviderItemCapabilities.ContentEnumerating
                                | NSFileProviderItemCapabilities.Reading

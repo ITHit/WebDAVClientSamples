@@ -1,6 +1,8 @@
-﻿using WebDavContainerExtension.Metadatas;
-using FileProvider;
+﻿using FileProvider;
 using Foundation;
+
+using WebDavCommon.Helpers;
+using WebDavCommon.Metadatas;
 
 namespace WebDavContainerExtension.FileProviderItems
 {
@@ -25,7 +27,7 @@ namespace WebDavContainerExtension.FileProviderItems
         public FileItem(FileMetadata fileMetadata) : base(fileMetadata)
         {
             Size = new NSNumber(fileMetadata.Size);
-            TypeIdentifier = Extension.GetFileTypeIdentifier(fileMetadata.Name);
+            TypeIdentifier = UTTypeHelper.GetFileTypeIdentifier(fileMetadata.Name);
             this.Capabilities = NSFileProviderItemCapabilities.Writing
                                 | NSFileProviderItemCapabilities.Deleting
                                 | NSFileProviderItemCapabilities.Reading

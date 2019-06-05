@@ -118,7 +118,8 @@
     <DefineConstants>
     </DefineConstants>
     <WarningLevel>4</WarningLevel>
-    <CodesignKey></CodesignKey>
+    <CodesignKey>
+    </CodesignKey>
     <MtouchNoSymbolStrip>true</MtouchNoSymbolStrip>
     <MtouchVerbosity>
     </MtouchVerbosity>
@@ -138,8 +139,8 @@
     <AppExtensionDebugBundleId />
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="ITHit.WebDAV.Client, Version=3.1.1057.0, Culture=neutral, PublicKeyToken=2ed2d3f88a9114ce, processorArchitecture=MSIL">
-      <HintPath>..\packages\ITHitWebDAVClient.3.1.1057\lib\Xamarin.iOS10\ITHit.WebDAV.Client.dll</HintPath>
+    <Reference Include="ITHit.WebDAV.Client, Version=3.1.1072.0, Culture=neutral, PublicKeyToken=2ed2d3f88a9114ce, processorArchitecture=MSIL">
+      <HintPath>..\packages\ITHitWebDAVClient.3.1.1072\lib\Xamarin.iOS10\ITHit.WebDAV.Client.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -155,29 +156,13 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Helpers\FileManagerHelper.cs" />
-    <Compile Include="Metadatas\FileMetadata.cs" />
     <Compile Include="FileProviderEnumerators\EmptyEnumerator.cs" />
     <Compile Include="FileProviderItems\FileItem.cs" />
     <Compile Include="FileProviderItems\FolderItem.cs" />
     <Compile Include="FileProviderItems\ProviderItem.cs" />
-    <Compile Include="Extension.cs" />
     <Compile Include="FileProviderEnumerators\FileEnumerator.cs" />
     <Compile Include="FileProviderExtension.cs" />
     <Compile Include="FileProviderEnumerators\FolderEnumerator.cs" />
-    <Compile Include="Metadatas\FolderMetadata.cs" />
-    <Compile Include="Metadatas\ItemMetadata.cs" />
-    <Compile Include="LocationMapper.cs" />
-    <Compile Include="Metadatas\ChangeTracker.cs" />
-    <Compile Include="Metadatas\MetadataDiff.cs" />
-    <Compile Include="Metadatas\StorageManager.cs" />
-    <Compile Include="Extensions\NSErrorExtension.cs" />
-    <Compile Include="Helpers\NSErrorHelper.cs" />
-    <Compile Include="Storages\FileExtendedAttribute.cs" />
-    <Compile Include="Storages\LocalFile.cs" />
-    <Compile Include="Storages\LocalFolder.cs" />
-    <Compile Include="Storages\LocalItem.cs" />
-    <Compile Include="Storages\LocalStorage.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\WebDavCommon\WebDavCommon.csproj">
