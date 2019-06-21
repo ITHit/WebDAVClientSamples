@@ -15,9 +15,11 @@ namespace WebDavContainer
 
         private const string ErrorTitle = "Error";
 
-        private const string InvalidUriTitle = "Server URL is invalid";
+        private const string InvalidUriTitle = "Server URL is invalid.";
 
-        private const string InvalidUriMessage = "Input valid server URL";
+        private const string EmptyUriMessage = "Provide WebDAV server URL.";
+
+        private const string IncorrectServerNameMessage = "Incorrect server name.";
 
         /// <inheritdoc />
         protected ViewController(IntPtr handle) : base(handle)
@@ -50,7 +52,8 @@ namespace WebDavContainer
 
             if (string.IsNullOrEmpty(serverUri) || string.IsNullOrWhiteSpace(serverUri))
             {
-                this.ShowAlert(InvalidUriTitle, InvalidUriMessage);
+                this.ShowAlert(InvalidUriTitle, EmptyUriMessage);
+                return;
             }
 
 
@@ -66,6 +69,17 @@ namespace WebDavContainer
                 AppGroupSettings.SaveServerSettings(serverSettings);
                 this.ShowAlert(LoginSuccessfulTitle, LoginSuccessfulMessage);
             }
+            catch (System.Net.WebException ex)
+            {
+                if(ex.Status == System.Net.WebExceptionStatus.NameResolutionFailure) 
+                {
+                    this.ShowAlert(InvalidUriTitle, IncorrectServerNameMessage);
+                }
+                else
+                {
+                    this.ShowAlert(ErrorTitle, ex.Message);
+                }
+            }
             catch (Exception ex)
             {
                 this.ShowAlert(ErrorTitle, ex.Message);
@@ -73,7 +87,7 @@ namespace WebDavContainer
             finally
             {
                 sender.Enabled = true;
-             }
+            }
 
             this.Editing = false;
             this.Server.ResignFirstResponder();
