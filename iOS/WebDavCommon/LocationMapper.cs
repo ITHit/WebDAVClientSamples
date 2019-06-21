@@ -19,7 +19,16 @@ namespace WebDavCommon
         /// <param name="localStorageRoot">The local storage root.</param>
         public LocationMapper(Uri serverRootUri, string localStorageRoot)
         {
-            this.ServerRoot = serverRootUri ?? throw new ArgumentNullException(nameof(serverRootUri));
+            if(serverRootUri == null) throw new ArgumentNullException(nameof(serverRootUri));
+            string serverRootUriAsString = serverRootUri.ToString();
+            if(serverRootUriAsString.EndsWith("/")) {
+                this.ServerRoot = serverRootUri;
+            }
+            else
+            {
+                this.ServerRoot = new Uri(serverRootUriAsString + "/");
+            }
+
             this.LocalStorageRoot = localStorageRoot ?? throw new ArgumentNullException(nameof(localStorageRoot));
         }
 
